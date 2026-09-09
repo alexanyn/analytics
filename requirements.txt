@@ -1,0 +1,7 @@
+requests
+feedparser
+beautifulsoup4
+aiohttp
+pydantic
+googletrans==4.0.0-rc1
+pre-commit

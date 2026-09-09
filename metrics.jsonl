@@ -1,0 +1,4 @@
+{"timestamp": "2026-09-09T19:00:07.630412", "status": "empty_no_candidates", "articles": 0, "categories": 0, "errors": []}
+{"timestamp": "2026-09-09T19:02:34.165939", "status": "empty_no_candidates", "articles": 0, "categories": 0, "errors": []}
+{"timestamp": "2026-09-09T19:08:42.131910", "status": "empty_no_candidates", "articles": 0, "categories": 0, "errors": []}
+{"timestamp": "2026-09-09T19:10:09.194733", "status": "success", "articles": 45, "categories": 6, "errors": [], "duration_seconds": 16.8}

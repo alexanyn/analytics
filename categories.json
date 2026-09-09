@@ -1,0 +1,14 @@
+{
+  "GEOPOLITICS_WORLD": ["foreign affairs", "ecfr", "csis", "chatham house", "carnegie", "geopolitics", "foreign policy", "diplomacy", "international"],
+  "GEOPOLITICS_RUSSIA": ["russia in global affairs", "ponars", "imemo", "russian council", "valdai", "россия", "москва", "кремль", "политика", "украина"],
+  "ECONOMICS_WORLD": ["financial times", "economist", "peterson", "bruegel", "voxeu", "cepr", "economy", "market", "trade", "finance"],
+  "ECONOMICS_RUSSIA": ["econs", "forecast.ru", "цмакп", "gaidar", "iep", "экономика", "рынок", "бизнес", "финансы"],
+  "TECHNOLOGY_WORLD": ["stratechery", "information", "semianalysis", "mit tech", "benedict evans", "ai", "tech", "software", "chip"],
+  "TECHNOLOGY_RUSSIA": ["data insight", "исиэз", "hse", "технология", "цифр", "программ"],
+  "ENERGY_WORLD": ["iea", "oxford energy", "bloombergnef", "wood mackenzie", "carbon brief", "energy", "oil", "gas", "renewable"],
+  "ENERGY_RUSSIA": ["инэи", "energyland", "vygon", "энергетическая политика", "skolkovo", "энергия", "газ", "нефть"],
+  "SECURITY_WORLD": ["war on rocks", "isw", "rand", "iiss", "sipri", "military", "defense", "security", "conflict", "nato"],
+  "SECURITY_RUSSIA": ["cast", "jamestown", "osw", "bmpd", "lawfare", "безопасность", "военн", "оборон", "конфликт"],
+  "PR_WORLD": ["edelman", "provoke", "arthur w. page", "institute for pr", "drum", "pr", "communication", "media", "brand"],
+  "PR_RUSSIA": ["medialogia", "brand analytics", "акос", "пресс", "реклам", "медиа", "коммуникац"]
+}
