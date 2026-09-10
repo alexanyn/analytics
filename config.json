@@ -64,6 +64,9 @@
     "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
     "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
     "https://www.eastasiaforum.org/feed/",
-    "https://www.worldpoliticsreview.com/feed/"
+    "https://www.worldpoliticsreview.com/feed/",
+    "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=site:orfonline.org&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=site:rsis.edu.sg&hl=en-US&gl=US&ceid=US:en"
   ]
 }

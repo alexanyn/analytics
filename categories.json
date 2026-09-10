@@ -20,7 +20,13 @@
     "le monde diplomatique",
     "east asia forum",
     "world politics review",
-    "wpr"
+    "wpr",
+    "lowy institute",
+    "the interpreter",
+    "orf online",
+    "observer research foundation",
+    "rsis",
+    "rajaratnam school"
   ],
   "GEOPOLITICS_RUSSIA": [
     "russia in global affairs",
@@ -110,7 +116,9 @@
     "defense",
     "security",
     "conflict",
-    "nato"
+    "nato",
+    "rsis",
+    "rajaratnam school"
   ],
   "SECURITY_RUSSIA": [
     "cast",
