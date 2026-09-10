@@ -1,0 +1,46 @@
+name: Analytics Digest Daily
+
+on:
+  schedule:
+    # 09:00 Moscow time (06:00 UTC)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --no-cache-dir -r requirements.txt
+
+      - name: Run analytics digest
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python -m analytics.main
+
+      - name: Generate monitoring dashboard
+        run: |
+          python3 generate_dashboard.py || true
+
+      - name: Commit metrics and dashboard
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          if [ -f metrics.jsonl ]; then
+            git add metrics.jsonl recent_titles.json dashboard.html 2>/dev/null || true
+            git commit -m "Analytics digest run $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || true
+            git push || true
+          fi
