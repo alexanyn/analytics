@@ -53,6 +53,9 @@
     "https://medialogia.ru/feed/",
     "https://br-analytics.ru/rss/",
     "https://www.project-syndicate.org/rss",
-    "https://akospr.ru/feed/"
+    "https://akospr.ru/feed/",
+    "https://thediplomat.com/feed/",
+    "https://www.brookings.edu/feed/",
+    "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en"
   ]
 }
