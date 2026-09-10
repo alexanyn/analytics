@@ -67,6 +67,11 @@
     "https://www.worldpoliticsreview.com/feed/",
     "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
     "https://news.google.com/rss/search?q=site:orfonline.org&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=site:rsis.edu.sg&hl=en-US&gl=US&ceid=US:en"
+    "https://news.google.com/rss/search?q=site:rsis.edu.sg&hl=en-US&gl=US&ceid=US:en",
+    "https://www.provokemedia.com/rss",
+    "https://www.prdaily.com/feed/",
+    "https://www.ragan.com/feed/",
+    "https://spinsucks.com/feed/",
+    "https://www.odwyerpr.com/rss"
   ]
 }
