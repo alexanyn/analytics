@@ -63,6 +63,7 @@
     "https://www.monde-diplomatique.fr/recents.xml",
     "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
     "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
-    "https://www.eastasiaforum.org/feed/"
+    "https://www.eastasiaforum.org/feed/",
+    "https://www.worldpoliticsreview.com/feed/"
   ]
 }
