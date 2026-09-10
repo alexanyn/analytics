@@ -1,5 +1,5 @@
 {
-  "GEOPOLITICS_WORLD": ["foreign affairs", "ecfr", "csis", "chatham house", "carnegie", "geopolitics", "foreign policy", "diplomacy", "international"],
+  "GEOPOLITICS_WORLD": ["foreign affairs", "project syndicate", "ecfr", "csis", "chatham house", "carnegie", "geopolitics", "foreign policy", "diplomacy", "international"],
   "GEOPOLITICS_RUSSIA": ["russia in global affairs", "ponars", "imemo", "russian council", "valdai", "россия", "москва", "кремль", "политика", "украина"],
   "ECONOMICS_WORLD": ["financial times", "economist", "peterson", "bruegel", "voxeu", "cepr", "economy", "market", "trade", "finance"],
   "ECONOMICS_RUSSIA": ["econs", "forecast.ru", "цмакп", "gaidar", "iep", "экономика", "рынок", "бизнес", "финансы"],
