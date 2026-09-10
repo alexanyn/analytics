@@ -56,6 +56,13 @@
     "https://akospr.ru/feed/",
     "https://thediplomat.com/feed/",
     "https://www.brookings.edu/feed/",
-    "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en"
+    "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=site:merics.org&hl=en-US&gl=US&ceid=US:en",
+    "https://www.swp-berlin.org/en/SWPPublications.xml",
+    "https://news.google.com/rss/search?q=site:dgap.org&hl=en-US&gl=US&ceid=US:en",
+    "https://www.monde-diplomatique.fr/recents.xml",
+    "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
+    "https://www.eastasiaforum.org/feed/"
   ]
 }
