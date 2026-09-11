@@ -176,6 +176,74 @@ def remove_title_from_summary(title: str, summary: str) -> str:
     return summary
 
 
+def remove_title_from_summary(title: str, summary: str) -> str:
+    """Если summary начинается с заголовка (или его части) — убирает его."""
+    if not title or not summary:
+        return summary
+
+    def norm(s):
+        return re.sub(r"[^\w\s]", " ", s.lower())
+
+    t_n = " ".join(norm(title).split())
+    s_n = " ".join(norm(summary).split())
+    if not t_n or not s_n:
+        return summary
+
+    t_words = t_n.split()
+    s_words = s_n.split()
+
+    # Ищем максимальное совпадение слов в начале
+    matched = 0
+    for tw, sw in zip(t_words, s_words):
+        if tw == sw:
+            matched += 1
+        else:
+            break
+
+    # Если совпало больше 60% слов заголовка — убираем
+    if matched < max(3, len(t_words) * 0.6):
+        return summary
+
+    # Находим позицию в оригинальном summary после matched слов
+    word_count = 0
+    pos = 0
+    for i, ch in enumerate(summary):
+        if i == 0 or summary[i - 1].isspace():
+            word_count += 1
+        if word_count > matched:
+            pos = i
+            break
+
+    if pos > 0:
+        remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
+        if len(remainder) > 40:
+            return remainder
+
+    return summary
+
+
+def strip_source_suffix_from_title(title: str, source_name: str) -> str:
+    """Убирает название источника из заголовка (суффикс через тире, пайп, двоеточие)."""
+    if not title or not source_name:
+        return title
+    escaped = re.escape(source_name)
+    patterns = [
+        rf"\s*[-–—|]\s*{escaped}\s*$",
+        rf"\s*:\s*{escaped}\s*$",
+        rf"\s+{escaped}\s*$",
+    ]
+    for p in patterns:
+        title = re.sub(p, "", title, flags=re.IGNORECASE).strip()
+    # Дополнительно: полные варианты названий для Google News
+    extra_names = [
+        "Council on Foreign Relations", "Council on Foreign Relations (CFR)",
+        "Совет по международным отношениям",
+    ]
+    for name in extra_names:
+        title = re.sub(rf"\s*[-–—|:]\s*{re.escape(name)}\s*$", "", title, flags=re.IGNORECASE).strip()
+    return title
+
+
 def strip_trailing_source(text: str, source_name: str) -> str:
     """Убирает название источника в конце текста."""
     if not text or not source_name:
@@ -257,9 +325,10 @@ def article_to_html(article: Article, cache: dict) -> str:
     title = post_process_text(clean_html(title))
     summary = post_process_text(clean_html(summary))
 
-    summary = remove_title_from_summary(title, summary)
-
     source = get_source_name(article.feed_url)
+
+    title = strip_source_suffix_from_title(title, source)
+    summary = remove_title_from_summary(title, summary)
     summary = strip_trailing_source(summary, source)
 
     summary = truncate_at_sentence(summary, max_len=600)
