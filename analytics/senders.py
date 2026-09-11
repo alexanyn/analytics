@@ -1,17 +1,24 @@
+# analytics/senders.py
 import time
 import requests
 import logging
 from typing import List, Dict
+
 from .models import Article
 from .formatters import article_to_html, get_category_emoji, get_category_russian_name
+
 logger = logging.getLogger("analytics_digest")
-def _pack_lines_into_chunks(text, limit=32000):
+
+SEPARATOR = "─" * 16
+
+
+def _pack_lines_into_chunks(text: str, limit: int = 32000) -> List[str]:
     lines = text.split("\n")
     chunks = []
     current = []
     for line in lines:
         if len(line) > limit:
-            line = line[:limit-3] + "..."
+            line = line[: limit - 3] + "..."
         if current and len("\n".join(current + [line])) > limit:
             chunks.append("\n".join(current))
             current = []
@@ -19,6 +26,8 @@ def _pack_lines_into_chunks(text, limit=32000):
     if current:
         chunks.append("\n".join(current))
     return chunks
+
+
 def _send_one_chunk(chat_id, chunk, token: str) -> bool:
     if not chunk.strip():
         return False
@@ -58,11 +67,13 @@ def _send_one_chunk(chat_id, chunk, token: str) -> bool:
             continue
         except requests.exceptions.RequestException as e:
             wait_time = 3 * (attempt + 1)
-            logger.warning(f"Сетевая ошибка (попытка {attempt+1}/{max_retries}): {e}")
+            logger.warning(f"Сетевая ошибка (попытка {attempt + 1}/{max_retries}): {e}")
             if attempt < max_retries - 1:
                 time.sleep(wait_time)
             continue
     return False
+
+
 def send_to_telegram(articles_by_category: Dict[str, List[Article]], token: str, chat_id: str, cache: dict) -> bool:
     if not articles_by_category:
         return False
@@ -72,13 +83,13 @@ def send_to_telegram(articles_by_category: Dict[str, List[Article]], token: str,
         emoji = get_category_emoji(category)
         cat_display = get_category_russian_name(category)
         if not first_category:
-            full_html += "\n" + "─" * 30 + "\n\n"
+            full_html += "\n" + SEPARATOR + "\n\n"
         full_html += f"{emoji} <b>{cat_display}</b>\n\n"
         articles = articles_by_category[category][:5]
         for i, article in enumerate(articles):
             full_html += article_to_html(article, cache)
             if i < len(articles) - 1:
-                full_html += "\n\n" + "─" * 30 + "\n\n"
+                full_html += "\n\n" + SEPARATOR + "\n\n"
         first_category = False
     if not full_html.strip():
         logger.error("Empty digest HTML")
@@ -95,5 +106,5 @@ def send_to_telegram(articles_by_category: Dict[str, List[Article]], token: str,
     if all_ok:
         logger.info(f"Sent {len(chunks)} messages, {sum(len(a) for a in articles_by_category.values())} articles")
     else:
-        logger.error(f"Some chunks failed")
+        logger.error("Some chunks failed")
     return all_ok
