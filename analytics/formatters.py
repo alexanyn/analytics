@@ -8,7 +8,6 @@ from .models import Article
 
 
 def load_source_names() -> Dict[str, str]:
-    """Загружает канонические названия источников из sources.json."""
     try:
         with open("sources.json", "r", encoding="utf-8") as f:
             return json.load(f)
@@ -18,27 +17,36 @@ def load_source_names() -> Dict[str, str]:
 
 CANONICAL_NAMES = load_source_names()
 
+_MONTHS_RU = (
+    r"января|февраля|марта|апреля|мая|июня|июля|августа|"
+    r"сентября|октября|ноября|декабря"
+)
+
 
 def clean_html(text: str) -> str:
-    """Очищает HTML-теги и атрибуты из текста."""
+    """Очищает HTML-теги и атрибуты."""
     if not text:
         return ""
     try:
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(text, "html.parser")
-        for tag in soup(["script", "style", "img", "figure"]):
+        for tag in soup(["script", "style", "img", "figure", "iframe"]):
             tag.decompose()
         text = soup.get_text()
     except Exception:
         text = re.sub(r"<[^>]+>", "", text)
 
-    # Остатки незакрытых тегов и атрибутов
     text = re.sub(r"<[^>]*>?", "", text)
     text = re.sub(r'target\s*=\s*"_blank"', "", text)
     text = re.sub(r'href\s*=\s*"[^"]*"', "", text)
     text = re.sub(r"\s+", " ", text)
-    text = text.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
-    text = text.replace("&quot;", '"').replace("&#39;", "'").replace("&nbsp;", " ")
+    replacements = {
+        "&lt;": "<", "&gt;": ">", "&amp;": "&", "&quot;": '"',
+        "&#39;": "'", "&nbsp;": " ", "&#8217;": "'",
+        "&#8220;": '"', "&#8221;": '"', "&#8211;": "–", "&#8212;": "—",
+    }
+    for k, v in replacements.items():
+        text = text.replace(k, v)
     return text.strip()
 
 
@@ -50,26 +58,45 @@ def post_process_text(text: str) -> str:
     # 1. Пробел после знаков препинания перед буквой
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z])", r"\1 ", text)
 
-    # 2. WordPress-хвосты (русская и английская версии)
+    # 2. WordPress-хвосты (обоих родов)
     text = re.sub(r"\s*[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
     text = re.sub(
-        r"\s*впервые\s+появился\s+на\s+сайте\s+[^.]+\.?\s*$",
-        "",
-        text,
-        flags=re.IGNORECASE,
+        r"\s*[Пп]убликация\s+[^.]{0,200}?\s+впервые\s+появил(?:ась|ся)\s+на\s+сайте\s+[^.]+\.?\s*$",
+        "", text,
+    )
+    text = re.sub(
+        r"\s*впервые\s+появил(?:ась|ся)\s+на\s+сайте\s+[^.]+\.?\s*$",
+        "", text, flags=re.IGNORECASE,
     )
     text = re.sub(
         r"\s*The\s+post\s+.+?\s+appeared\s+first\s+on\s+[^.]+\.?\s*$",
-        "",
-        text,
-        flags=re.IGNORECASE,
+        "", text, flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\s*This\s+post\s+.+?\s+appeared\s+first\s+on\s+[^.]+\.?\s*$",
+        "", text, flags=re.IGNORECASE,
     )
 
-    # 3. Фразы «Комментарий эксперта X» и англ. аналог
-    text = re.sub(r"\s*Комментарий\s+эксперта\s+\S+\s*", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*Expert\s+Comment\s+by\s+\S+\s*", " ", text, flags=re.IGNORECASE)
+    # 3. "Комментарий эксперта <Имя> <Дата>"
+    text = re.sub(
+        r"Комментарий\s+эксперта\s+.{0,80}?\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.?",
+        "", text, flags=re.IGNORECASE | re.DOTALL,
+    )
+    text = re.sub(
+        r"Комментарий\s+эксперта\s+[А-ЯЁA-Z][а-яёa-z]+\s+[А-ЯЁA-Z][а-яёa-z]+\s*",
+        "", text, flags=re.IGNORECASE,
+    )
+    # Отдельные даты формата "10 сентября 2026 г." в начале
+    text = re.sub(
+        r"^\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.\s*",
+        "", text, flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\s*Expert\s+Comment\s+by\s+[^.?!]{1,80}[.?!]?\s*",
+        " ", text, flags=re.IGNORECASE,
+    )
 
-    # 4. HTML-артефакты Google News
+    # 4. Артефакты Google News
     text = re.sub(r"<а\s*href[^>]*>", "", text)
     text = re.sub(r"<a\s*href[^>]*>", "", text)
     text = re.sub(r'target\s*=\s*"_blank"\s*>?', "", text)
@@ -77,16 +104,21 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"\bаль\b\s*", " ", text)
     text = re.sub(r"<[^>]*>?", "", text)
 
-    # 5. Пробел между латиницей и кириллицей при склейке
+    # 5. Маркеры обрезки [ … ] и […]
+    text = re.sub(r"\s*\[\s*…\s*\]\s*", " ", text)
+    text = re.sub(r"\s*\[\s*\.\.\.\s*\]\s*", " ", text)
+    text = re.sub(r"\s*\[\s*…\s*\]", " ", text)
+
+    # 6. Пробел между латиницей и кириллицей при склейке
     text = re.sub(r"([a-zA-Z])([А-Яа-яЁё])", r"\1 \2", text)
     text = re.sub(r"([А-Яа-яЁё])([a-zA-Z])", r"\1 \2", text)
 
-    # 6. Нормализация имён собственных, которые Gemini коверкает
+    # 7. Нормализация имён собственных
     text = text.replace("Брейгель", "Bruegel").replace("Брюгель", "Bruegel")
     text = re.sub(r"Carbon\s*Кратко", "Carbon Brief", text)
     text = re.sub(r"CarbonКратко", "Carbon Brief", text)
 
-    # 7. Лишние пробелы и знаки
+    # 8. Лишние пробелы и знаки
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     text = re.sub(r"([.,!?;:])\1+", r"\1", text)
@@ -94,8 +126,58 @@ def post_process_text(text: str) -> str:
     return text.strip()
 
 
+def remove_title_from_summary(title: str, summary: str) -> str:
+    """Если summary начинается с заголовка — убирает его."""
+    if not title or not summary:
+        return summary
+
+    t = title.strip().rstrip("?!.:;, ")
+    if len(t) < 15:
+        return summary
+
+    def norm(s):
+        return re.sub(r"[^\w\s]", "", s.lower()).strip()
+
+    t_n = " ".join(norm(t).split())
+    s_n = " ".join(norm(summary).split())
+    if not t_n or not s_n:
+        return summary
+
+    t_check = t_n[:60]
+    if not s_n.startswith(t_check[: min(30, len(t_check))]):
+        return summary
+
+    t_words = t_n.split()
+    s_words = s_n.split()
+    matched = 0
+    for tw, sw in zip(t_words, s_words):
+        if tw == sw:
+            matched += 1
+        else:
+            break
+
+    if matched < len(t_words) * 0.7:
+        return summary
+
+    word_count = 0
+    pos = 0
+    for i, ch in enumerate(summary):
+        if i == 0 or summary[i - 1].isspace():
+            word_count += 1
+        if word_count > matched:
+            pos = i
+            break
+
+    if pos > 0:
+        remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
+        if len(remainder) > 40:
+            return remainder
+
+    return summary
+
+
 def strip_trailing_source(text: str, source_name: str) -> str:
-    """Убирает название источника в конце текста (оно и так идёт под текстом)."""
+    """Убирает название источника в конце текста."""
     if not text or not source_name:
         return text
     pattern = r"[\s\-–—.,:]*" + re.escape(source_name) + r"\s*[.!?]*\s*$"
@@ -103,8 +185,30 @@ def strip_trailing_source(text: str, source_name: str) -> str:
     return text.strip()
 
 
+def truncate_at_sentence(text: str, max_len: int = 600) -> str:
+    """Обрезает текст до последнего целого предложения."""
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+
+    cut = text[:max_len]
+
+    matches = list(re.finditer(r"[.!?](?:\s|$)", cut))
+    if matches:
+        last_end = matches[-1].end()
+        if last_end >= max_len * 0.5:
+            return cut[:last_end].strip()
+
+    last_space = cut.rfind(" ")
+    if last_space >= max_len * 0.5:
+        result = cut[:last_space].rstrip(" ,;:—–-")
+        return result + "…"
+
+    return cut.rstrip() + "…"
+
+
 def get_source_name(feed_url: str) -> str:
-    """Возвращает каноническое название источника по URL фида."""
     for domain, name in CANONICAL_NAMES.items():
         if domain in feed_url:
             return name
@@ -117,18 +221,12 @@ def get_source_name(feed_url: str) -> str:
 
 def get_category_emoji(category: str) -> str:
     emojis = {
-        "GEOPOLITICS_WORLD": "🌍",
-        "GEOPOLITICS_RUSSIA": "🇷🇺",
-        "ECONOMICS_WORLD": "📈",
-        "ECONOMICS_RUSSIA": "📊",
-        "TECHNOLOGY_WORLD": "💻",
-        "TECHNOLOGY_RUSSIA": "🖥️",
-        "ENERGY_WORLD": "⚡",
-        "ENERGY_RUSSIA": "🔋",
-        "SECURITY_WORLD": "🛡️",
-        "SECURITY_RUSSIA": "⚔️",
-        "PR_WORLD": "📢",
-        "PR_RUSSIA": "📣",
+        "GEOPOLITICS_WORLD": "🌍", "GEOPOLITICS_RUSSIA": "🇷🇺",
+        "ECONOMICS_WORLD": "📈", "ECONOMICS_RUSSIA": "📊",
+        "TECHNOLOGY_WORLD": "💻", "TECHNOLOGY_RUSSIA": "🖥️",
+        "ENERGY_WORLD": "⚡", "ENERGY_RUSSIA": "🔋",
+        "SECURITY_WORLD": "🛡️", "SECURITY_RUSSIA": "⚔️",
+        "PR_WORLD": "📢", "PR_RUSSIA": "📣",
     }
     return emojis.get(category, "📌")
 
@@ -152,7 +250,6 @@ def get_category_russian_name(category: str) -> str:
 
 
 def article_to_html(article: Article, cache: dict) -> str:
-    """Форматирует статью в HTML-блок для Telegram."""
     cached = cache.get(article.title, {})
     title = cached.get("translated_title", article.title)
     summary = cached.get("translated_summary", article.summary)
@@ -160,14 +257,13 @@ def article_to_html(article: Article, cache: dict) -> str:
     title = post_process_text(clean_html(title))
     summary = post_process_text(clean_html(summary))
 
+    summary = remove_title_from_summary(title, summary)
+
     source = get_source_name(article.feed_url)
     summary = strip_trailing_source(summary, source)
 
-    summary = summary[:600]
-    if len(summary) == 600 and summary[-1] not in ". ,!?":
-        summary = summary.rsplit(" ", 1)[0] + "..."
+    summary = truncate_at_sentence(summary, max_len=600)
 
-    # Экранирование HTML
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     summary = summary.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     source_html = source.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
