@@ -13,7 +13,7 @@ def wait_until_publish_time():
         return
     max_wait = config.max_publish_wait_seconds
     now = now_moscow()
-    target = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    target = now.replace(hour=10, minute=0, second=0, microsecond=0)
     if now > target:
         target += datetime.timedelta(days=1)
     wait = (target - now).total_seconds()

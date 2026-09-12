@@ -73,5 +73,6 @@
     "https://www.ragan.com/feed/",
     "https://spinsucks.com/feed/",
     "https://www.odwyerpr.com/rss"
-  ]
+  ],
+  "max_age_days": 1
 }
