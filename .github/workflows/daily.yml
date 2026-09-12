@@ -1,9 +1,6 @@
 name: Analytics Digest Daily
 
 on:
-  schedule:
-    # 09:00 Moscow time (06:00 UTC)
-    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
