@@ -22,9 +22,26 @@ _MONTHS_RU = (
     r"сентября|октября|ноября|декабря"
 )
 
+EMOJIS = {
+    "GEOPOLITICS": "🌍",
+    "ECONOMICS": "📈",
+    "BUSINESS": "💼",
+    "TECHNOLOGY": "💻",
+    "ENERGY": "⚡",
+    "SECURITY": "🛡️",
+}
+
+NAMES = {
+    "GEOPOLITICS": "ГЕОПОЛИТИКА",
+    "ECONOMICS": "ЭКОНОМИКА",
+    "BUSINESS": "БИЗНЕС",
+    "TECHNOLOGY": "ТЕХНОЛОГИИ И ИННОВАЦИИ",
+    "ENERGY": "ЭНЕРГЕТИКА И РЕСУРСЫ",
+    "SECURITY": "БЕЗОПАСНОСТЬ И КОНФЛИКТЫ",
+}
+
 
 def clean_html(text: str) -> str:
-    """Очищает HTML-теги и атрибуты."""
     if not text:
         return ""
     try:
@@ -51,14 +68,11 @@ def clean_html(text: str) -> str:
 
 
 def post_process_text(text: str) -> str:
-    """Постобработка: чинит артефакты RSS и перевода."""
     if not text:
         return ""
 
-    # 1. Пробел после знаков препинания перед буквой
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z])", r"\1 ", text)
 
-    # 2. WordPress-хвосты (обоих родов)
     text = re.sub(r"\s*[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
     text = re.sub(
         r"\s*[Пп]убликация\s+[^.]{0,200}?\s+впервые\s+появил(?:ась|ся)\s+на\s+сайте\s+[^.]+\.?\s*$",
@@ -77,7 +91,6 @@ def post_process_text(text: str) -> str:
         "", text, flags=re.IGNORECASE,
     )
 
-    # 3. "Комментарий эксперта <Имя> <Дата>"
     text = re.sub(
         r"Комментарий\s+эксперта\s+.{0,80}?\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.?",
         "", text, flags=re.IGNORECASE | re.DOTALL,
@@ -86,7 +99,6 @@ def post_process_text(text: str) -> str:
         r"Комментарий\s+эксперта\s+[А-ЯЁA-Z][а-яёa-z]+\s+[А-ЯЁA-Z][а-яёa-z]+\s*",
         "", text, flags=re.IGNORECASE,
     )
-    # Отдельные даты формата "10 сентября 2026 г." в начале
     text = re.sub(
         r"^\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.\s*",
         "", text, flags=re.IGNORECASE,
@@ -96,7 +108,6 @@ def post_process_text(text: str) -> str:
         " ", text, flags=re.IGNORECASE,
     )
 
-    # 4. Артефакты Google News
     text = re.sub(r"<а\s*href[^>]*>", "", text)
     text = re.sub(r"<a\s*href[^>]*>", "", text)
     text = re.sub(r'target\s*=\s*"_blank"\s*>?', "", text)
@@ -104,21 +115,17 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"\bаль\b\s*", " ", text)
     text = re.sub(r"<[^>]*>?", "", text)
 
-    # 5. Маркеры обрезки [ … ] и […]
     text = re.sub(r"\s*\[\s*…\s*\]\s*", " ", text)
     text = re.sub(r"\s*\[\s*\.\.\.\s*\]\s*", " ", text)
     text = re.sub(r"\s*\[\s*…\s*\]", " ", text)
 
-    # 6. Пробел между латиницей и кириллицей при склейке
     text = re.sub(r"([a-zA-Z])([А-Яа-яЁё])", r"\1 \2", text)
     text = re.sub(r"([А-Яа-яЁё])([a-zA-Z])", r"\1 \2", text)
 
-    # 7. Нормализация имён собственных
     text = text.replace("Брейгель", "Bruegel").replace("Брюгель", "Bruegel")
     text = re.sub(r"Carbon\s*Кратко", "Carbon Brief", text)
     text = re.sub(r"CarbonКратко", "Carbon Brief", text)
 
-    # 8. Лишние пробелы и знаки
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     text = re.sub(r"([.,!?;:])\1+", r"\1", text)
@@ -126,58 +133,28 @@ def post_process_text(text: str) -> str:
     return text.strip()
 
 
-def remove_title_from_summary(title: str, summary: str) -> str:
-    """Если summary начинается с заголовка — убирает его."""
-    if not title or not summary:
-        return summary
-
-    t = title.strip().rstrip("?!.:;, ")
-    if len(t) < 15:
-        return summary
-
-    def norm(s):
-        return re.sub(r"[^\w\s]", "", s.lower()).strip()
-
-    t_n = " ".join(norm(t).split())
-    s_n = " ".join(norm(summary).split())
-    if not t_n or not s_n:
-        return summary
-
-    t_check = t_n[:60]
-    if not s_n.startswith(t_check[: min(30, len(t_check))]):
-        return summary
-
-    t_words = t_n.split()
-    s_words = s_n.split()
-    matched = 0
-    for tw, sw in zip(t_words, s_words):
-        if tw == sw:
-            matched += 1
-        else:
-            break
-
-    if matched < len(t_words) * 0.7:
-        return summary
-
-    word_count = 0
-    pos = 0
-    for i, ch in enumerate(summary):
-        if i == 0 or summary[i - 1].isspace():
-            word_count += 1
-        if word_count > matched:
-            pos = i
-            break
-
-    if pos > 0:
-        remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
-        if len(remainder) > 40:
-            return remainder
-
-    return summary
+def strip_source_suffix_from_title(title: str, source_name: str) -> str:
+    if not title or not source_name:
+        return title
+    escaped = re.escape(source_name)
+    patterns = [
+        rf"\s*[-–—|]\s*{escaped}\s*$",
+        rf"\s*:\s*{escaped}\s*$",
+        rf"\s+{escaped}\s*$",
+    ]
+    for p in patterns:
+        title = re.sub(p, "", title, flags=re.IGNORECASE).strip()
+    extra_names = [
+        "Council on Foreign Relations", "Council on Foreign Relations (CFR)",
+        "Совет по международным отношениям",
+        "piie. com", "piie.com", "Peterson Institute for International Economics",
+    ]
+    for name in extra_names:
+        title = re.sub(rf"\s*[-–—|:]\s*{re.escape(name)}\s*$", "", title, flags=re.IGNORECASE).strip()
+    return title
 
 
 def remove_title_from_summary(title: str, summary: str) -> str:
-    """Если summary начинается с заголовка (или его части) — убирает его."""
     if not title or not summary:
         return summary
 
@@ -192,7 +169,6 @@ def remove_title_from_summary(title: str, summary: str) -> str:
     t_words = t_n.split()
     s_words = s_n.split()
 
-    # Ищем максимальное совпадение слов в начале
     matched = 0
     for tw, sw in zip(t_words, s_words):
         if tw == sw:
@@ -200,11 +176,9 @@ def remove_title_from_summary(title: str, summary: str) -> str:
         else:
             break
 
-    # Если совпало больше 60% слов заголовка — убираем
     if matched < max(3, len(t_words) * 0.6):
         return summary
 
-    # Находим позицию в оригинальном summary после matched слов
     word_count = 0
     pos = 0
     for i, ch in enumerate(summary):
@@ -222,30 +196,7 @@ def remove_title_from_summary(title: str, summary: str) -> str:
     return summary
 
 
-def strip_source_suffix_from_title(title: str, source_name: str) -> str:
-    """Убирает название источника из заголовка (суффикс через тире, пайп, двоеточие)."""
-    if not title or not source_name:
-        return title
-    escaped = re.escape(source_name)
-    patterns = [
-        rf"\s*[-–—|]\s*{escaped}\s*$",
-        rf"\s*:\s*{escaped}\s*$",
-        rf"\s+{escaped}\s*$",
-    ]
-    for p in patterns:
-        title = re.sub(p, "", title, flags=re.IGNORECASE).strip()
-    # Дополнительно: полные варианты названий для Google News
-    extra_names = [
-        "Council on Foreign Relations", "Council on Foreign Relations (CFR)",
-        "Совет по международным отношениям",
-    ]
-    for name in extra_names:
-        title = re.sub(rf"\s*[-–—|:]\s*{re.escape(name)}\s*$", "", title, flags=re.IGNORECASE).strip()
-    return title
-
-
 def strip_trailing_source(text: str, source_name: str) -> str:
-    """Убирает название источника в конце текста."""
     if not text or not source_name:
         return text
     pattern = r"[\s\-–—.,:]*" + re.escape(source_name) + r"\s*[.!?]*\s*$"
@@ -254,7 +205,6 @@ def strip_trailing_source(text: str, source_name: str) -> str:
 
 
 def truncate_at_sentence(text: str, max_len: int = 600) -> str:
-    """Обрезает текст до последнего целого предложения."""
     if not text:
         return ""
     if len(text) <= max_len:
@@ -288,33 +238,11 @@ def get_source_name(feed_url: str) -> str:
 
 
 def get_category_emoji(category: str) -> str:
-    emojis = {
-        "GEOPOLITICS_WORLD": "🌍", "GEOPOLITICS_RUSSIA": "🇷🇺",
-        "ECONOMICS_WORLD": "📈", "ECONOMICS_RUSSIA": "📊",
-        "TECHNOLOGY_WORLD": "💻", "TECHNOLOGY_RUSSIA": "🖥️",
-        "ENERGY_WORLD": "⚡", "ENERGY_RUSSIA": "🔋",
-        "SECURITY_WORLD": "🛡️", "SECURITY_RUSSIA": "⚔️",
-        "PR_WORLD": "📢", "PR_RUSSIA": "📣",
-    }
-    return emojis.get(category, "📌")
+    return EMOJIS.get(category, "📌")
 
 
 def get_category_russian_name(category: str) -> str:
-    names = {
-        "GEOPOLITICS_WORLD": "ГЕОПОЛИТИКА | МИР",
-        "GEOPOLITICS_RUSSIA": "ГЕОПОЛИТИКА | РОССИЯ",
-        "ECONOMICS_WORLD": "ЭКОНОМИКА | МИР",
-        "ECONOMICS_RUSSIA": "ЭКОНОМИКА | РОССИЯ",
-        "TECHNOLOGY_WORLD": "ТЕХНОЛОГИИ | МИР",
-        "TECHNOLOGY_RUSSIA": "ТЕХНОЛОГИИ | РОССИЯ",
-        "ENERGY_WORLD": "ЭНЕРГЕТИКА | МИР",
-        "ENERGY_RUSSIA": "ЭНЕРГЕТИКА | РОССИЯ",
-        "SECURITY_WORLD": "БЕЗОПАСНОСТЬ | МИР",
-        "SECURITY_RUSSIA": "БЕЗОПАСНОСТЬ | РОССИЯ",
-        "PR_WORLD": "PR & КОММУНИКАЦИИ | МИР",
-        "PR_RUSSIA": "PR & КОММУНИКАЦИИ | РОССИЯ",
-    }
-    return names.get(category, category)
+    return NAMES.get(category, category)
 
 
 def article_to_html(article: Article, cache: dict) -> str:
@@ -330,7 +258,6 @@ def article_to_html(article: Article, cache: dict) -> str:
     title = strip_source_suffix_from_title(title, source)
     summary = remove_title_from_summary(title, summary)
     summary = strip_trailing_source(summary, source)
-
     summary = truncate_at_sentence(summary, max_len=600)
 
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")

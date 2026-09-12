@@ -1,13 +1,27 @@
 import json
 import logging
 from typing import List, Dict
+
 from .models import Article
+
+logger = logging.getLogger("analytics_digest")
+
+# Фиксированный порядок отображения категорий
+CATEGORY_ORDER = ["GEOPOLITICS", "ECONOMICS", "BUSINESS", "TECHNOLOGY", "ENERGY", "SECURITY"]
+
+DEFAULT_CATEGORY = "GEOPOLITICS"
+
+
 def load_categories() -> Dict[str, List[str]]:
     with open("categories.json", "r", encoding="utf-8") as f:
         return json.load(f)
+
+
 CATEGORY_KEYWORDS = load_categories()
+
+
 def classify_articles(articles: List[Article]) -> Dict[str, List[Article]]:
-    logger = logging.getLogger("analytics_digest")
+    """Классифицирует статьи по ключевым словам в заголовке и описании."""
     categorized = {}
     for article in articles:
         text = (article.title + " " + article.summary).lower()
@@ -19,7 +33,7 @@ def classify_articles(articles: List[Article]) -> Dict[str, List[Article]]:
                 max_matches = matches
                 best_category = category
         if not best_category:
-            best_category = "GEOPOLITICS_WORLD"
+            best_category = DEFAULT_CATEGORY
         article.category = best_category
         categorized.setdefault(best_category, []).append(article)
     logger.info(f"Classified {len(articles)} into {len(categorized)} categories")

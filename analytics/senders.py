@@ -6,6 +6,7 @@ from typing import List, Dict
 
 from .models import Article
 from .formatters import article_to_html, get_category_emoji, get_category_russian_name
+from .classifiers import CATEGORY_ORDER
 
 logger = logging.getLogger("analytics_digest")
 
@@ -77,25 +78,38 @@ def _send_one_chunk(chat_id, chunk, token: str) -> bool:
 def send_to_telegram(articles_by_category: Dict[str, List[Article]], token: str, chat_id: str, cache: dict) -> bool:
     if not articles_by_category:
         return False
+
     full_html = "📊 <b>АНАЛИТИЧЕСКИЙ ДАЙДЖЕСТ</b>\n\n"
     first_category = True
-    for category in sorted(articles_by_category.keys()):
+
+    # Итерируемся в фиксированном порядке, пропуская пустые категории
+    for category in CATEGORY_ORDER:
+        if category not in articles_by_category:
+            continue
+        articles = articles_by_category[category]
+        if not articles:
+            continue
+
         emoji = get_category_emoji(category)
         cat_display = get_category_russian_name(category)
+
         if not first_category:
             full_html += "\n" + SEPARATOR + "\n\n"
         full_html += f"{emoji} <b>{cat_display}</b>\n\n"
-        articles = articles_by_category[category][:5]
+
+        articles = articles[:5]
         for i, article in enumerate(articles):
             full_html += article_to_html(article, cache)
             if i < len(articles) - 1:
                 full_html += "\n\n" + SEPARATOR + "\n\n"
         first_category = False
+
     if not full_html.strip():
         logger.error("Empty digest HTML")
         return False
     if len(full_html) <= 32000:
         return _send_one_chunk(chat_id, full_html, token)
+
     chunks = _pack_lines_into_chunks(full_html, limit=32000)
     all_ok = True
     for i, chunk in enumerate(chunks):
