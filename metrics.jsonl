@@ -3,3 +3,9 @@
 {"timestamp": "2026-09-09T19:08:42.131910", "status": "empty_no_candidates", "articles": 0, "categories": 0, "errors": []}
 {"timestamp": "2026-09-09T19:10:09.194733", "status": "success", "articles": 45, "categories": 6, "errors": [], "duration_seconds": 16.8}
 {"timestamp": "2026-09-09T19:15:33.872568", "status": "success", "articles": 2, "categories": 1, "errors": [], "duration_seconds": 16.1}
+{"timestamp": "2026-09-12T00:03:46.342071", "status": "success", "articles": 110, "categories": 6, "errors": [], "duration_seconds": 413.5}
+{"timestamp": "2026-09-12T00:08:13.917197", "status": "success", "articles": 8, "categories": 3, "errors": [], "duration_seconds": 22.6}
+{"timestamp": "2026-09-12T00:09:58.397435", "status": "empty_no_deduplicated", "articles": 0, "categories": 0, "errors": []}
+{"timestamp": "2026-09-12T13:15:12.512215", "status": "success", "articles": 3, "categories": 3, "errors": [], "duration_seconds": 19.8}
+{"timestamp": "2026-09-18T17:33:49.712698", "status": "success", "articles": 39, "categories": 6, "errors": [], "duration_seconds": 56.5}
+{"timestamp": "2026-09-18T18:21:08.954282", "status": "success", "articles": 4, "categories": 1, "errors": [], "duration_seconds": 24.4}
