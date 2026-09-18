@@ -15,7 +15,7 @@ from .translators import translate_and_summarize
 from .senders import send_to_telegram
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
-from .text_utils import normalize_for_dedup
+from .text_utils import normalize_for_dedup, looks_translated
 
 logger = logging.getLogger("analytics_digest")
 handler = logging.StreamHandler(sys.stdout)
@@ -23,19 +23,41 @@ handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-MAX_TRANSLATE_WORKERS = 10
+MAX_TRANSLATE_WORKERS = 5
 
 
 def translate_one(article):
-    """Переводит заголовок и описание. Возвращает (article, t_title, t_summary)."""
+    """Стрипает суффикс источника, переводит, проверяет результат."""
+    from .formatters import strip_source_suffix_from_title, get_source_name
     try:
-        t_title = translate_and_summarize(article.title, is_summary=False)
+        source = get_source_name(article.feed_url)
+        clean_title = strip_source_suffix_from_title(article.title, source) or article.title
+    except Exception:
+        clean_title = article.title
+
+    try:
+        t_title = translate_and_summarize(clean_title, is_summary=False)
         t_summary = translate_and_summarize(article.summary, is_summary=True)
     except Exception as e:
-        logger.debug(f"Translate failed for '{article.title[:40]}': {e}")
-        t_title = article.title
-        t_summary = article.summary
-    return article, t_title, t_summary
+        logger.debug(f"Translate error: {e}")
+        t_title, t_summary = clean_title, article.summary
+
+    title_ok = looks_translated(clean_title, t_title)
+    summary_ok = looks_translated(article.summary, t_summary) or not article.summary
+
+    # Один retry для заголовка если провалился
+    if not title_ok:
+        time.sleep(1)
+        t_title_retry = translate_and_summarize(clean_title, is_summary=False)
+        if looks_translated(clean_title, t_title_retry):
+            t_title = t_title_retry
+            title_ok = True
+
+    ok = title_ok and summary_ok
+    if not ok:
+        logger.warning(f"Translation issue: '{clean_title[:60]}' (title_ok={title_ok}, summary_ok={summary_ok})")
+
+    return article, t_title, t_summary, ok
 
 
 async def main_async():
@@ -75,8 +97,6 @@ async def main_async():
         return
 
     categorized = classify_articles(deduped)
-
-    # Ограничиваем категории ДО перевода — в кеш попадут только финальные статьи
     max_per_cat = config.digest.max_items_per_category
     for cat in list(categorized.keys()):
         categorized[cat] = categorized[cat][:max_per_cat]
@@ -84,7 +104,6 @@ async def main_async():
     final_articles = [a for arts in categorized.values() for a in arts]
     logger.info(f"Final digest: {len(final_articles)} articles")
 
-    # Переводим только те, которых нет в кеше
     to_translate = [
         a for a in final_articles
         if normalize_for_dedup(a.title) not in recent_titles
@@ -93,20 +112,22 @@ async def main_async():
     if to_translate:
         logger.info(f"Translating {len(to_translate)} articles with {MAX_TRANSLATE_WORKERS} workers...")
         t_start = time.time()
+        ok_count = 0
         with ThreadPoolExecutor(max_workers=MAX_TRANSLATE_WORKERS) as executor:
             futures = [executor.submit(translate_one, a) for a in to_translate]
             for future in as_completed(futures):
                 try:
-                    article, t_title, t_summary = future.result()
-                    add_to_cache(recent_titles, article, t_title, t_summary)
+                    article, t_title, t_summary, ok = future.result()
+                    add_to_cache(recent_titles, article, t_title, t_summary, translation_ok=ok)
+                    if ok:
+                        ok_count += 1
                 except Exception as e:
                     logger.debug(f"Future error: {e}")
-        logger.info(f"Translation done in {time.time() - t_start:.1f}s")
+        logger.info(f"Translation done in {time.time() - t_start:.1f}s ({ok_count}/{len(to_translate)} ok)")
     else:
-        logger.info("All final articles already in cache — no translation needed")
+        logger.info("All final articles already in cache")
 
     wait_until_publish_time()
-
     success = send_to_telegram(categorized, token, chat_id, cache=recent_titles)
 
     with open("recent_titles.json", "w", encoding="utf-8") as f:
