@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 class DedupConfig(BaseModel):
     title_similarity_threshold_same_run: float = 0.50
     title_similarity_threshold_cross_run: float = 0.55
-    recent_titles_window_hours: int = 72
+    recent_titles_window_hours: int = 168
 class DigestConfig(BaseModel):
     max_items_per_category: int = 5
 class CollectionConfig(BaseModel):

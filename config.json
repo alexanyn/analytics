@@ -74,5 +74,8 @@
     "https://spinsucks.com/feed/",
     "https://www.odwyerpr.com/rss"
   ],
-  "max_age_days": 1
+  "max_age_days": 1,
+  "dedup": {
+    "recent_titles_window_hours": 168
+  }
 }

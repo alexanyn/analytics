@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from typing import Dict
 
 from .models import Article
+from .text_utils import normalize_for_dedup
 
 
 def load_source_names() -> Dict[str, str]:
@@ -349,7 +350,7 @@ def is_junk_article(article: Article) -> bool:
 
 
 def article_to_html(article: Article, cache: dict) -> str:
-    cached = cache.get(article.title, {})
+    cached = cache.get(normalize_for_dedup(article.title), {})
     title = cached.get("translated_title", article.title)
     summary = cached.get("translated_summary", article.summary)
 
