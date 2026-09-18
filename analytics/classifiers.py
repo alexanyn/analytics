@@ -1,12 +1,13 @@
+# analytics/classifiers.py
 import json
 import logging
+import re
 from typing import List, Dict
 
 from .models import Article
 
 logger = logging.getLogger("analytics_digest")
 
-# Фиксированный порядок отображения категорий
 CATEGORY_ORDER = ["GEOPOLITICS", "ECONOMICS", "BUSINESS", "TECHNOLOGY", "ENERGY", "SECURITY"]
 
 DEFAULT_CATEGORY = "GEOPOLITICS"
@@ -19,16 +20,22 @@ def load_categories() -> Dict[str, List[str]]:
 
 CATEGORY_KEYWORDS = load_categories()
 
+# Предкомпилированные паттерны с word boundary (исправляет ложные срабатывания)
+CATEGORY_PATTERNS = {
+    cat: [re.compile(r"\b" + re.escape(w) + r"\b", re.IGNORECASE) for w in words]
+    for cat, words in CATEGORY_KEYWORDS.items()
+}
+
 
 def classify_articles(articles: List[Article]) -> Dict[str, List[Article]]:
-    """Классифицирует статьи по ключевым словам в заголовке и описании."""
+    """Классифицирует статьи по ключевым словам с учётом границ слов."""
     categorized = {}
     for article in articles:
         text = (article.title + " " + article.summary).lower()
         best_category = None
         max_matches = 0
-        for category, words in CATEGORY_KEYWORDS.items():
-            matches = sum(1 for word in words if word in text)
+        for category, patterns in CATEGORY_PATTERNS.items():
+            matches = sum(1 for p in patterns if p.search(text))
             if matches > max_matches:
                 max_matches = matches
                 best_category = category

@@ -18,8 +18,8 @@ def load_source_names() -> Dict[str, str]:
 CANONICAL_NAMES = load_source_names()
 
 _MONTHS_RU = (
-    r"января|февраля|марта|апреля|мая|июня|июля|августа|"
-    r"сентября|октября|ноября|декабря"
+    r"январ|феврал|март|апрел|ма[йя]|июн|июл|август|"
+    r"сентябр|октябр|ноябр|декабр"
 )
 
 EMOJIS = {
@@ -39,6 +39,21 @@ NAMES = {
     "ENERGY": "ЭНЕРГЕТИКА И РЕСУРСЫ",
     "SECURITY": "БЕЗОПАСНОСТЬ И КОНФЛИКТЫ",
 }
+
+# Известные варианты суффиксов, добавляемых RSS-агрегаторами
+_EXTRA_TITLE_SUFFIXES = [
+    "Council on Foreign Relations",
+    "Council on Foreign Relations (CFR)",
+    "Совет по международным отношениям",
+    "Peterson Institute for International Economics",
+    "Center for Strategic and International Studies",
+    "Center for Strategic & International Studies",
+    "CSIS |Центр стратегических и международных исследований",
+    "CSIS | Центр стратегических и международных исследований",
+    "Chatham House",
+]
+
+_DOMAIN_TLD = r"(?:com|org|net|ru|io|edu|gov|uk|de|fr|pl|cn|jp|info|eu|co)"
 
 
 def clean_html(text: str) -> str:
@@ -71,43 +86,60 @@ def post_process_text(text: str) -> str:
     if not text:
         return ""
 
+    # 1. Пробел после знаков препинания
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z])", r"\1 ", text)
 
+    # 2. WordPress-хвосты (несколько форм)
     text = re.sub(r"\s*[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
+    text = re.sub(r"\s+[Пп]ост\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
+    text = re.sub(r"\s+[Пп]оявился\s+[Пп]ост\s+[^.!?]{5,250}\s*$", " ", text)
+    text = re.sub(r"\s+[Пп]убликация\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
+    text = re.sub(r"\s+[Сс]ообщение\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
     text = re.sub(
         r"\s*[Пп]убликация\s+[^.]{0,200}?\s+впервые\s+появил(?:ась|ся)\s+на\s+сайте\s+[^.]+\.?\s*$",
-        "", text,
+        " ", text,
     )
     text = re.sub(
         r"\s*впервые\s+появил(?:ась|ся)\s+на\s+сайте\s+[^.]+\.?\s*$",
-        "", text, flags=re.IGNORECASE,
+        " ", text, flags=re.IGNORECASE,
     )
     text = re.sub(
-        r"\s*The\s+post\s+.+?\s+appeared\s+first\s+on\s+[^.]+\.?\s*$",
-        "", text, flags=re.IGNORECASE,
-    )
-    text = re.sub(
-        r"\s*This\s+post\s+.+?\s+appeared\s+first\s+on\s+[^.]+\.?\s*$",
-        "", text, flags=re.IGNORECASE,
-    )
-
-    text = re.sub(
-        r"Комментарий\s+эксперта\s+.{0,80}?\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.?",
-        "", text, flags=re.IGNORECASE | re.DOTALL,
-    )
-    text = re.sub(
-        r"Комментарий\s+эксперта\s+[А-ЯЁA-Z][а-яёa-z]+\s+[А-ЯЁA-Z][а-яёa-z]+\s*",
-        "", text, flags=re.IGNORECASE,
-    )
-    text = re.sub(
-        r"^\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")\s+\d{4}\s*г?\.\s*",
-        "", text, flags=re.IGNORECASE,
-    )
-    text = re.sub(
-        r"\s*Expert\s+Comment\s+by\s+[^.?!]{1,80}[.?!]?\s*",
+        r"\s*[A-Za-z]+\s+post\s+.+?\s+appeared\s+first\s+on\s+[^.]+\.?\s*$",
         " ", text, flags=re.IGNORECASE,
     )
 
+    # 3. Event-маркеры
+    text = re.sub(r"\s*Анонимно\s*\(\s*не\s+проверено\s*\)\s*", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*Anonymous\s*\(\s*not\s+verified\s*\)\s*", " ", text, flags=re.IGNORECASE)
+
+    # 4. Дата + временной диапазон (анонсы событий)
+    text = re.sub(
+        r"\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}\s*г?\.?\s*"
+        r"[-–—]?\s*с\s*\d{1,2}:\d{2}\s+до\s+\d{1,2}:\d{2}[^.]*\.",
+        " ", text, flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}\s*г?\.?\s*"
+        r"[-–—]\s*с\s*\d{1,2}:\d{2}\s+до\s+\d{1,2}:\d{2}.*$",
+        " ", text, flags=re.IGNORECASE,
+    )
+
+    # 5. Хвостовые названия источников (русские и английские)
+    text = re.sub(
+        r"\s*Чатем[\s-]?Хаус\s*(?:Описание|и\s+Интернет|и\s+Интернет\.?)?\s*\.?\s*$",
+        " ", text, flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\s*Chatham\s+House\s+(?:Description|and\s+Internet)\s*\.?\s*$",
+        " ", text, flags=re.IGNORECASE,
+    )
+
+    # 6. Jamestown-специфика
+    text = re.sub(r"^\s*Краткое\s+содержание:\s*", "", text)
+    text = re.sub(r"\s*\(\s*[A-ZА-ЯЁ][\w\-]{1,15}\s+Пост\s*$", " ", text)
+    text = re.sub(r"\s+Пост\s*$", " ", text)
+
+    # 7. Артефакты Google News / HTML
     text = re.sub(r"<а\s*href[^>]*>", "", text)
     text = re.sub(r"<a\s*href[^>]*>", "", text)
     text = re.sub(r'target\s*=\s*"_blank"\s*>?', "", text)
@@ -115,42 +147,69 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"\bаль\b\s*", " ", text)
     text = re.sub(r"<[^>]*>?", "", text)
 
-    text = re.sub(r"\s*\[\s*…\s*\]\s*", " ", text)
-    text = re.sub(r"\s*\[\s*\.\.\.\s*\]\s*", " ", text)
-    text = re.sub(r"\s*\[\s*…\s*\]", " ", text)
+    # 8. Маркеры обрезки
+    text = re.sub(r"\s*\[\s*(?:…|\.\.\.)\s*\]\s*", " ", text)
 
+    # 9. Пробел между латиницей и кириллицей при склейке
     text = re.sub(r"([a-zA-Z])([А-Яа-яЁё])", r"\1 \2", text)
     text = re.sub(r"([А-Яа-яЁё])([a-zA-Z])", r"\1 \2", text)
 
+    # 10. Тире без пробелов: "команда –Европа" → "команда — Европа"
+    text = re.sub(r"([А-Яа-яЁёA-Za-z])[–—]([А-ЯЁA-Z])", r"\1 — \2", text)
+
+    # 11. Нормализация имён собственных
     text = text.replace("Брейгель", "Bruegel").replace("Брюгель", "Bruegel")
     text = re.sub(r"Carbon\s*Кратко", "Carbon Brief", text)
     text = re.sub(r"CarbonКратко", "Carbon Brief", text)
 
+    # 12. Точечные правки перевода
+    text = text.replace("пожарной безопасности", "огневой поддержки")
+
+    # 13. Финальная очистка
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     text = re.sub(r"([.,!?;:])\1+", r"\1", text)
 
-    return text.strip()
+    # 14. Заглавная буква в начале
+    text = text.strip()
+    if text and text[0].islower():
+        text = text[0].upper() + text[1:]
+
+    return text
 
 
 def strip_source_suffix_from_title(title: str, source_name: str) -> str:
-    if not title or not source_name:
+    if not title:
         return title
-    escaped = re.escape(source_name)
-    patterns = [
-        rf"\s*[-–—|]\s*{escaped}\s*$",
-        rf"\s*:\s*{escaped}\s*$",
-        rf"\s+{escaped}\s*$",
-    ]
-    for p in patterns:
-        title = re.sub(p, "", title, flags=re.IGNORECASE).strip()
-    extra_names = [
-        "Council on Foreign Relations", "Council on Foreign Relations (CFR)",
-        "Совет по международным отношениям",
-        "piie. com", "piie.com", "Peterson Institute for International Economics",
-    ]
-    for name in extra_names:
-        title = re.sub(rf"\s*[-–—|:]\s*{re.escape(name)}\s*$", "", title, flags=re.IGNORECASE).strip()
+
+    # 1. Каноническое имя источника
+    if source_name:
+        escaped = re.escape(source_name)
+        for p in [
+            rf"\s*[-–—|:]\s*{escaped}\s*$",
+            rf"\s+{escaped}\s*$",
+        ]:
+            title = re.sub(p, "", title, flags=re.IGNORECASE).strip()
+
+    # 2. Известные варианты
+    for name in _EXTRA_TITLE_SUFFIXES:
+        title = re.sub(
+            rf"\s*[-–—|:]\s*{re.escape(name)}.*$",
+            "", title, flags=re.IGNORECASE,
+        ).strip()
+
+    # 3. Доменные суффиксы: " - Features. csis. org", " - piie. com"
+    title = re.sub(
+        r"\s*[-–—]\s*[A-Za-zА-ЯЁа-яё0-9\s\.]{1,60}\b" + _DOMAIN_TLD + r"\s*$",
+        "", title, flags=re.IGNORECASE,
+    ).strip()
+
+    # 4. Суффикс вида " - Название | Подпись"
+    title = re.sub(
+        r"\s*[-–—]\s*[A-ZА-ЯЁ][^|]{1,80}\|.{0,120}$",
+        "", title,
+    ).strip()
+
     return title
 
 
@@ -169,6 +228,7 @@ def remove_title_from_summary(title: str, summary: str) -> str:
     t_words = t_n.split()
     s_words = s_n.split()
 
+    # Совпадение в начале
     matched = 0
     for tw, sw in zip(t_words, s_words):
         if tw == sw:
@@ -176,22 +236,32 @@ def remove_title_from_summary(title: str, summary: str) -> str:
         else:
             break
 
-    if matched < max(3, len(t_words) * 0.6):
-        return summary
+    if matched >= max(3, len(t_words) * 0.6):
+        word_count = 0
+        pos = 0
+        for i, ch in enumerate(summary):
+            if i == 0 or summary[i - 1].isspace():
+                word_count += 1
+            if word_count > matched:
+                pos = i
+                break
+        if pos > 0:
+            remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
+            if len(remainder) > 40:
+                summary = remainder
 
-    word_count = 0
-    pos = 0
-    for i, ch in enumerate(summary):
-        if i == 0 or summary[i - 1].isspace():
-            word_count += 1
-        if word_count > matched:
-            pos = i
-            break
-
-    if pos > 0:
-        remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
-        if len(remainder) > 40:
-            return remainder
+    # Совпадение в конце (для «Пост <title>»)
+    summary_n = " ".join(norm(summary).split())
+    if t_n in summary_n and len(t_words) >= 4:
+        # Удаляем фрагмент, содержащий заголовок
+        words = summary.split()
+        n_words = len(words)
+        title_word_count = len(t_words)
+        for i in range(max(0, n_words - title_word_count - 5), n_words):
+            candidate = " ".join(norm(" ".join(words[i:])).split())
+            if candidate.startswith(t_n[:40]):
+                summary = " ".join(words[:i]).rstrip(" .,:;-–—")
+                break
 
     return summary
 
@@ -211,7 +281,6 @@ def truncate_at_sentence(text: str, max_len: int = 600) -> str:
         return text
 
     cut = text[:max_len]
-
     matches = list(re.finditer(r"[.!?](?:\s|$)", cut))
     if matches:
         last_end = matches[-1].end()
@@ -243,6 +312,40 @@ def get_category_emoji(category: str) -> str:
 
 def get_category_russian_name(category: str) -> str:
     return NAMES.get(category, category)
+
+
+def is_junk_article(article: Article) -> bool:
+    """Отсеивает анонсы мероприятий и тестовые статьи."""
+    title = article.title or ""
+    text = (title + " " + (article.summary or "")).lower()
+
+    # Тестовые статьи
+    if re.match(r"^(?:отсечной|контрольный)\s+тест\b", title.lower().strip()):
+        return True
+    if re.match(r"^(?:cutoff|control)\s+test\b", title.lower().strip()):
+        return True
+
+    # Анонсы событий: время + дата
+    has_time = re.search(r"\d{1,2}:\d{2}\s*(?:[-–—]|до)\s*\d{1,2}:\d{2}", text)
+    has_date = re.search(
+        r"\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}", text, flags=re.IGNORECASE,
+    )
+    if has_time and has_date:
+        return True
+
+    # Анонсы-серии: «Серия «X»: ...»
+    if re.match(r"^серия\s+[«\"]", title.lower().strip()):
+        return True
+
+    # Маркеры анонимного события
+    if "анонимно (не проверено)" in text or "anonymous (not verified)" in text:
+        return True
+
+    # Анонсы с "Чатем-Хаус и Интернет"
+    if "чатем-хаус и интернет" in text or "chatham house and internet" in text:
+        return True
+
+    return False
 
 
 def article_to_html(article: Article, cache: dict) -> str:
