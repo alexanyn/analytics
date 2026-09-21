@@ -1,11 +1,11 @@
 {
-  "checked_at": "2026-09-21T23:22:50.230291",
+  "checked_at": "2026-09-22T02:30:03.589999",
   "stale_threshold_days": 7,
   "summary": {
     "total": 73,
-    "ok": 24,
-    "stale": 5,
-    "dead": 44
+    "ok": 28,
+    "stale": 4,
+    "dead": 41
   },
   "details": [
     {
@@ -14,7 +14,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.ben-evans.com/feed",
@@ -22,7 +23,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://blog.bmpd.livejournal.com/data/rss",
@@ -30,7 +32,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": null,
+      "error": "Timeout"
     },
     {
       "url": "https://br-analytics.ru/rss/",
@@ -38,7 +41,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.brookings.edu/feed/",
@@ -46,7 +50,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (<unknown>:58:0: undefined entity)"
     },
     {
       "url": "https://carnegieendowment.org/rss/publications/",
@@ -54,7 +59,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (silent)"
     },
     {
       "url": "https://www.cast.ru/feed/",
@@ -62,7 +68,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.cepr.org/content/voxeu-feed",
@@ -70,7 +77,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.datainsight.ru/rss",
@@ -78,7 +86,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.eastasiaforum.org/feed/",
@@ -86,7 +95,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.ecfr.eu/feed",
@@ -94,7 +104,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.economist.com/rss",
@@ -102,15 +113,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
-    },
-    {
-      "url": "https://econs.online/feed/",
-      "source_name": "econs.online",
-      "status": "dead",
-      "entries_count": 0,
-      "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.edelman.com/trust/feed/",
@@ -118,7 +122,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://energy.skolkovo.ru/feed/",
@@ -126,7 +131,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (<unknown>:2:0: syntax error)"
     },
     {
       "url": "https://energyland.info/feed/",
@@ -134,7 +140,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://energypolicy.ru/feed/",
@@ -142,15 +149,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
-    },
-    {
-      "url": "https://eng.globalaffairs.ru/feed/",
-      "source_name": "eng.globalaffairs.ru",
-      "status": "dead",
-      "entries_count": 0,
-      "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (<unknown>:37:0: undefined entity)"
     },
     {
       "url": "https://www.eriras.ru/rss.xml",
@@ -158,7 +158,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.forecast.ru/rss/",
@@ -166,7 +167,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": null,
+      "error": "Timeout"
     },
     {
       "url": "https://www.ft.com/rss",
@@ -174,7 +176,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": null,
+      "error": "Connection: 0, message='', url='https://www.ft.com/rss'"
     },
     {
       "url": "https://www.iea.org/news/rss.xml",
@@ -182,7 +185,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.iep.ru/en/feed/",
@@ -190,7 +194,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.iiss.org/feed",
@@ -198,7 +203,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.instituteforpr.org/feed/",
@@ -206,7 +212,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 503,
+      "error": "HTTP 503"
     },
     {
       "url": "https://www.issek.hse.ru/feed/",
@@ -214,7 +221,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": null,
+      "error": "Connection: Cannot connect to host www.issek.hse.ru:443 ssl:default [nodename nor servname provided, or not known]"
     },
     {
       "url": "https://jamestown.org/feed/",
@@ -222,7 +230,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.lawfaremedia.org/feed",
@@ -230,7 +239,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://medialogia.ru/feed/",
@@ -238,7 +248,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.odwyerpr.com/rss",
@@ -246,7 +257,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.osw.waw.pl/feed",
@@ -254,7 +266,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.oxfordenergy.org/feed/",
@@ -262,23 +275,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
-    },
-    {
-      "url": "https://www.page.org/feed/",
-      "source_name": "page.org",
-      "status": "dead",
-      "entries_count": 0,
-      "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
-    },
-    {
-      "url": "https://www.provokemedia.com/feed/",
-      "source_name": "provokemedia.com",
-      "status": "dead",
-      "entries_count": 0,
-      "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.provokemedia.com/rss",
@@ -286,7 +284,17 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
+    },
+    {
+      "url": "https://www.provokemedia.com/feed/",
+      "source_name": "provokemedia.com",
+      "status": "dead",
+      "entries_count": 0,
+      "latest_entry_age_days": null,
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.rand.org/news.html/feed",
@@ -294,7 +302,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (<unknown>:11:147: not well-formed (invalid token))"
     },
     {
       "url": "https://www.russiancouncil.ru/rss/",
@@ -302,7 +311,17 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 200,
+      "error": "No entries (<unknown>:94:86: not well-formed (invalid token))"
+    },
+    {
+      "url": "https://www.semianalysis.com/feed",
+      "source_name": "semianalysis.com",
+      "status": "dead",
+      "entries_count": 0,
+      "latest_entry_age_days": null,
+      "http_status": 429,
+      "error": "HTTP 429"
     },
     {
       "url": "https://www.sipri.org/news_feed",
@@ -310,7 +329,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.thedrum.com/feed",
@@ -318,7 +338,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.theinformation.com/rss",
@@ -326,7 +347,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.understandingwar.org/feed",
@@ -334,7 +356,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 403,
+      "error": "HTTP 403"
     },
     {
       "url": "https://www.vygon.consulting/feed/",
@@ -342,7 +365,8 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
       "url": "https://www.woodmac.com/feed/",
@@ -350,22 +374,25 @@
       "status": "dead",
       "entries_count": 0,
       "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "http_status": 404,
+      "error": "HTTP 404"
     },
     {
-      "url": "https://www.worldpoliticsreview.com/feed/",
-      "source_name": "worldpoliticsreview.com",
-      "status": "dead",
-      "entries_count": 0,
-      "latest_entry_age_days": null,
-      "error": "Empty response or no entries"
+      "url": "https://news.google.com/rss/search?q=site:merics.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "stale",
+      "entries_count": 100,
+      "latest_entry_age_days": 7.5,
+      "http_status": 200,
+      "error": null
     },
     {
       "url": "https://news.google.com/rss/search?q=site:imemo.ru&hl=ru&gl=RU&ceid=RU:ru",
       "source_name": "news.google.com",
       "status": "stale",
       "entries_count": 100,
-      "latest_entry_age_days": 203.5,
+      "latest_entry_age_days": 203.6,
+      "http_status": 200,
       "error": null
     },
     {
@@ -373,15 +400,8 @@
       "source_name": "news.google.com",
       "status": "stale",
       "entries_count": 100,
-      "latest_entry_age_days": 18.3,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:merics.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "stale",
-      "entries_count": 100,
-      "latest_entry_age_days": 7.4,
+      "latest_entry_age_days": 18.4,
+      "http_status": 200,
       "error": null
     },
     {
@@ -389,15 +409,8 @@
       "source_name": "ponarseurasia.org",
       "status": "stale",
       "entries_count": 10,
-      "latest_entry_age_days": 26.4,
-      "error": null
-    },
-    {
-      "url": "https://www.semianalysis.com/feed",
-      "source_name": "semianalysis.com",
-      "status": "stale",
-      "entries_count": 10,
-      "latest_entry_age_days": 370.2,
+      "latest_entry_age_days": 26.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -405,7 +418,8 @@
       "source_name": "about.bnef.com",
       "status": "ok",
       "entries_count": 10,
-      "latest_entry_age_days": 0.4,
+      "latest_entry_age_days": 0.6,
+      "http_status": 200,
       "error": null
     },
     {
@@ -413,7 +427,8 @@
       "source_name": "carbonbrief.org",
       "status": "ok",
       "entries_count": 12,
-      "latest_entry_age_days": 0.3,
+      "latest_entry_age_days": 0.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -421,7 +436,26 @@
       "source_name": "chathamhouse.org",
       "status": "ok",
       "entries_count": 50,
-      "latest_entry_age_days": 0.6,
+      "latest_entry_age_days": 0.7,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://econs.online/feed/",
+      "source_name": "econs.online",
+      "status": "ok",
+      "entries_count": 20,
+      "latest_entry_age_days": 3.8,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://eng.globalaffairs.ru/feed/",
+      "source_name": "eng.globalaffairs.ru",
+      "status": "ok",
+      "entries_count": 50,
+      "latest_entry_age_days": 0.9,
+      "http_status": 200,
       "error": null
     },
     {
@@ -429,7 +463,8 @@
       "source_name": "foreignaffairs.com",
       "status": "ok",
       "entries_count": 20,
-      "latest_entry_age_days": 0.8,
+      "latest_entry_age_days": 0.9,
+      "http_status": 200,
       "error": null
     },
     {
@@ -437,79 +472,8 @@
       "source_name": "monde-diplomatique.fr",
       "status": "ok",
       "entries_count": 20,
-      "latest_entry_age_days": null,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:csis.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 3.2,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:piie.com&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 0.2,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:bruegel.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 4.4,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
       "latest_entry_age_days": 0.5,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:dgap.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 0.4,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 3.9,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 0.1,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 0.8,
-      "error": null
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:rsis.edu.sg&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 0.6,
+      "http_status": 200,
       "error": null
     },
     {
@@ -517,7 +481,98 @@
       "source_name": "news.google.com",
       "status": "ok",
       "entries_count": 100,
+      "latest_entry_age_days": 3.5,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:rsis.edu.sg&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.7,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.6,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 4.0,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:bruegel.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 4.5,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:piie.com&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.3,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:dgap.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.5,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:csis.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
       "latest_entry_age_days": 3.4,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.3,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.9,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://www.page.org/feed/",
+      "source_name": "page.org",
+      "status": "ok",
+      "entries_count": 10,
+      "latest_entry_age_days": 5.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -525,7 +580,8 @@
       "source_name": "prdaily.com",
       "status": "ok",
       "entries_count": 25,
-      "latest_entry_age_days": 0.4,
+      "latest_entry_age_days": 0.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -533,7 +589,8 @@
       "source_name": "project-syndicate.org",
       "status": "ok",
       "entries_count": 20,
-      "latest_entry_age_days": 0.3,
+      "latest_entry_age_days": 0.4,
+      "http_status": 200,
       "error": null
     },
     {
@@ -541,7 +598,8 @@
       "source_name": "ragan.com",
       "status": "ok",
       "entries_count": 25,
-      "latest_entry_age_days": 0.6,
+      "latest_entry_age_days": 0.7,
+      "http_status": 200,
       "error": null
     },
     {
@@ -549,7 +607,8 @@
       "source_name": "spinsucks.com",
       "status": "ok",
       "entries_count": 150,
-      "latest_entry_age_days": 4.5,
+      "latest_entry_age_days": 4.6,
+      "http_status": 200,
       "error": null
     },
     {
@@ -557,7 +616,8 @@
       "source_name": "stratechery.com",
       "status": "ok",
       "entries_count": 10,
-      "latest_entry_age_days": 0.6,
+      "latest_entry_age_days": 0.7,
+      "http_status": 200,
       "error": null
     },
     {
@@ -565,7 +625,8 @@
       "source_name": "swp-berlin.org",
       "status": "ok",
       "entries_count": 100,
-      "latest_entry_age_days": 5.4,
+      "latest_entry_age_days": 5.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -573,7 +634,8 @@
       "source_name": "technologyreview.com",
       "status": "ok",
       "entries_count": 10,
-      "latest_entry_age_days": 0.5,
+      "latest_entry_age_days": 0.6,
+      "http_status": 200,
       "error": null
     },
     {
@@ -581,7 +643,8 @@
       "source_name": "thediplomat.com",
       "status": "ok",
       "entries_count": 96,
-      "latest_entry_age_days": 0.3,
+      "latest_entry_age_days": 0.5,
+      "http_status": 200,
       "error": null
     },
     {
@@ -589,7 +652,17 @@
       "source_name": "warontherocks.com",
       "status": "ok",
       "entries_count": 100,
-      "latest_entry_age_days": 0.2,
+      "latest_entry_age_days": 0.4,
+      "http_status": 200,
+      "error": null
+    },
+    {
+      "url": "https://www.worldpoliticsreview.com/feed/",
+      "source_name": "worldpoliticsreview.com",
+      "status": "ok",
+      "entries_count": 10,
+      "latest_entry_age_days": 0.3,
+      "http_status": 200,
       "error": null
     }
   ]
