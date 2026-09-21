@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Еженедельная проверка здоровья RSS-источников.
-Использует aiohttp + User-Agent — как и основной сборщик дайджеста.
+Использует aiohttp + User-Agent, фиксит невалидный XML, знает про "known blocked".
 """
 import asyncio
 import json
 import os
+import re
 import sys
 import time
 import urllib3
@@ -18,12 +19,20 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 STALE_THRESHOLD_DAYS = 7
 HEALTH_FILE = "rss_health.json"
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
     ),
     "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
+    "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+}
+
+# Домены, которые заведомо блокируют ботов — их не считаем проблемой
+KNOWN_BLOCKED = {
+    "economist.com", "ft.com", "theinformation.com", "semianalysis.com",
+    "ben-evans.com", "brookings.edu", "carnegieendowment.org",
 }
 
 
@@ -35,15 +44,26 @@ def get_source_name(url: str) -> str:
         return url
 
 
+def fix_xml(content: bytes) -> bytes:
+    """Чинит типичные проблемы RSS: неопределённые entities, битые символы."""
+    # Заменяем необъявленные entities вроде &nbsp; &hellip; &mdash;
+    content = re.sub(
+        rb"&(?!(?:#\d+|#x[0-9a-fA-F]+|amp|lt|gt|quot|apos);)([a-zA-Z]+);",
+        rb"\1",
+        content,
+    )
+    # Убираем управляющие символы, которые ломают XML
+    content = re.sub(rb"[\x00-\x08\x0B\x0C\x0E-\x1F]", b"", content)
+    return content
+
+
 def get_published_time(entry) -> float | None:
-    # Сначала пробуем feedparser-парсер
     for field in ("published_parsed", "updated_parsed", "created_parsed"):
         if field in entry and entry[field]:
             try:
                 return time.mktime(entry[field])
             except Exception:
                 pass
-    # Потом сырые строки
     for field in ("published", "updated", "created"):
         if field in entry:
             try:
@@ -65,36 +85,39 @@ async def check_one_feed(session: aiohttp.ClientSession, url: str) -> dict:
         "latest_entry_age_days": None,
         "http_status": None,
         "error": None,
+        "known_blocked": any(b in url for b in KNOWN_BLOCKED),
     }
     try:
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=25)) as resp:
             result["http_status"] = resp.status
             if resp.status != 200:
                 result["error"] = f"HTTP {resp.status}"
                 return result
-            content = await resp.read()
-            if not content:
+            raw = await resp.read()
+            if not raw:
                 result["error"] = "Empty response body"
                 return result
-            parsed = feedparser.parse(content)
-            if not getattr(parsed, "entries", None):
-                detail = None
-                if getattr(parsed, "bozo", False):
-                    detail = str(parsed.bozo_exception)[:150]
-                result["error"] = f"No entries ({detail or 'silent'})"
-                return result
-            result["entries_count"] = len(parsed.entries)
 
+            parsed = feedparser.parse(raw)
+            if not getattr(parsed, "entries", None):
+                # Пробуем починить XML
+                fixed = fix_xml(raw)
+                parsed = feedparser.parse(fixed)
+
+            if not getattr(parsed, "entries", None):
+                detail = str(parsed.bozo_exception)[:120] if getattr(parsed, "bozo", False) else "silent"
+                result["error"] = f"No entries ({detail})"
+                return result
+
+            result["entries_count"] = len(parsed.entries)
             latest_ts = None
             for entry in parsed.entries[:10]:
                 ts = get_published_time(entry)
                 if ts and (latest_ts is None or ts > latest_ts):
                     latest_ts = ts
-
             if latest_ts is None:
                 result["status"] = "ok"
                 return result
-
             age_days = (time.time() - latest_ts) / 86400
             result["latest_entry_age_days"] = round(age_days, 1)
             result["status"] = "stale" if age_days > STALE_THRESHOLD_DAYS else "ok"
@@ -119,7 +142,6 @@ async def main_async():
         sys.exit(1)
 
     print(f"🩺 Проверяем здоровье {len(rss_feeds)} RSS-источников...")
-
     connector = aiohttp.TCPConnector(ssl=False)
     results = []
     async with aiohttp.ClientSession(connector=connector, headers=HEADERS) as session:
@@ -127,7 +149,14 @@ async def main_async():
         for i, coro in enumerate(asyncio.as_completed(tasks), 1):
             r = await coro
             results.append(r)
-            icon = "✅" if r["status"] == "ok" else ("⏳" if r["status"] == "stale" else "💀")
+            if r["status"] == "ok":
+                icon = "✅"
+            elif r["status"] == "stale":
+                icon = "⏳"
+            elif r["known_blocked"]:
+                icon = "🚫"
+            else:
+                icon = "💀"
             extra = ""
             if r["status"] != "ok":
                 info = r.get("error") or (
@@ -136,23 +165,33 @@ async def main_async():
                 extra = f" — {info}"
             print(f"  [{i}/{len(rss_feeds)}] {icon} {r['source_name']}{extra}")
 
-    dead = sum(1 for r in results if r["status"] == "dead")
+    dead = sum(1 for r in results if r["status"] == "dead" and not r["known_blocked"])
     stale = sum(1 for r in results if r["status"] == "stale")
-    ok = len(results) - dead - stale
+    blocked = sum(1 for r in results if r["status"] == "dead" and r["known_blocked"])
+    ok = len(results) - dead - stale - blocked
 
     report = {
         "checked_at": datetime.now().isoformat(),
         "stale_threshold_days": STALE_THRESHOLD_DAYS,
-        "summary": {"total": len(results), "ok": ok, "stale": stale, "dead": dead},
+        "summary": {
+            "total": len(results),
+            "ok": ok,
+            "stale": stale,
+            "dead": dead,
+            "blocked": blocked,
+        },
         "details": sorted(
             results,
-            key=lambda r: ({"dead": 0, "stale": 1, "ok": 2}.get(r["status"], 3), r["source_name"]),
+            key=lambda r: (
+                {"dead": 0, "stale": 1, "ok": 2}.get(r["status"], 3),
+                r["source_name"],
+            ),
         ),
     }
     with open(HEALTH_FILE, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
 
-    print(f"\n📊 Итог: OK: {ok}, Stale: {stale}, Dead: {dead}")
+    print(f"\n📊 Итог: OK: {ok}, Stale: {stale}, Dead: {dead}, Known blocked: {blocked}")
     print(f"💾 Отчёт сохранён в {HEALTH_FILE}")
 
 

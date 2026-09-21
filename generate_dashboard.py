@@ -131,6 +131,7 @@ def format_health(health):
             for d in items[:15]
         )
 
+    blocked = [d for d in details if d.get("status") == "dead" and d.get("known_blocked")]
     return f"""
   <section class="panel">
     <h2><span class="eyebrow">04</span> Здоровье RSS-источников</h2>
@@ -144,6 +145,8 @@ def format_health(health):
         {rows(dead, "error")}
         <h3>Протухли ({summary.get('stale', 0)})</h3>
         {rows(stale, "latest_entry_age_days")}
+        <h3>Заблокированы ботозащитой ({summary.get('blocked', 0)})</h3>
+        <div class="dim small">Эти источники защищены Cloudflare/пейволлом — блокировка ожидаема, не считается проблемой.</div>
       </div>
     </div>
   </section>"""
