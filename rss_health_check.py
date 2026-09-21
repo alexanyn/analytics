@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Еженедельная проверка здоровья RSS-источников.
-Использует aiohttp + User-Agent, фиксит невалидный XML, знает про "known blocked".
+Использует aiohttp + User-Agent, чинит невалидный XML,
+знает про "known blocked" (Cloudflare / paywall).
 """
 import asyncio
 import json
@@ -29,10 +30,15 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
 }
 
-# Домены, которые заведомо блокируют ботов — их не считаем проблемой
+# Домены, которые заведомо блокируют ботов — не считаем проблемой
 KNOWN_BLOCKED = {
-    "economist.com", "ft.com", "theinformation.com", "semianalysis.com",
-    "ben-evans.com", "brookings.edu", "carnegieendowment.org",
+    "economist.com",
+    "ft.com",
+    "theinformation.com",
+    "semianalysis.com",
+    "ben-evans.com",
+    "brookings.edu",
+    "carnegieendowment.org",
     "provokemedia.com",
 }
 
@@ -46,29 +52,21 @@ def get_source_name(url: str) -> str:
 
 
 def fix_xml(content: bytes) -> bytes:
-    """Чинит типичные проблемы RSS: неопределённые entities, битые символы, CDATA."""
-    # BOM
+    """Чинит типичные проблемы RSS: entities, control-символы, одиночные & < >."""
     if content.startswith(b"\xef\xbb\xbf"):
         content = content[3:]
-    # Заменяем необъявленные entities
+    # Заменяем необъявленные entities вроде &nbsp; &hellip;
     content = re.sub(
         rb"&(?!(?:#\d+|#x[0-9a-fA-F]+|amp|lt|gt|quot|apos);)([a-zA-Z]+);",
         rb"\1",
         content,
     )
-    # Убираем одиночные & (не entity)
+    # Одиночные & → &amp;
     content = re.sub(rb"&(?!(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);)", b"&amp;", content)
-    # Убираем control-символы
+    # Control-символы
     content = re.sub(rb"[\x00-\x08\x0B\x0C\x0E-\x1F]", b"", content)
-    # Спасаем одиночные < и > не в составе тега
+    # Одиночные < не в составе тега → &lt;
     content = re.sub(rb"<(?![a-zA-Z/!?])", b"&lt;", content)
-    # Пробуем декодировать как UTF-8 с игнором ошибок и пересобрать
-    try:
-        text = content.decode("utf-8", errors="replace")
-        text = text.encode("utf-8")
-        content = text
-    except Exception:
-        pass
     return content
 
 
@@ -91,6 +89,32 @@ def get_published_time(entry) -> float | None:
     return None
 
 
+async def fetch_feed(session: aiohttp.ClientSession, url: str):
+    """Возвращает (status_code, raw_bytes_or_None, error_str_or_None)."""
+    for attempt in range(3):
+        try:
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
+                if resp.status == 429:
+                    if attempt < 2:
+                        await asyncio.sleep(2 ** attempt + 1)
+                        continue
+                    return resp.status, None, "HTTP 429 (rate limit)"
+                if resp.status != 200:
+                    return resp.status, None, f"HTTP {resp.status}"
+                raw = await resp.read()
+                return resp.status, raw, None
+        except asyncio.TimeoutError:
+            if attempt < 2:
+                await asyncio.sleep(2)
+                continue
+            return None, None, "Timeout"
+        except aiohttp.ClientError as e:
+            return None, None, f"Connection: {str(e)[:120]}"
+        except Exception as e:
+            return None, None, str(e)[:150]
+    return None, None, "Unknown"
+
+
 async def check_one_feed(session: aiohttp.ClientSession, url: str) -> dict:
     result = {
         "url": url,
@@ -102,56 +126,47 @@ async def check_one_feed(session: aiohttp.ClientSession, url: str) -> dict:
         "error": None,
         "known_blocked": any(b in url for b in KNOWN_BLOCKED),
     }
-    try:
-        raw = None
-        for attempt in range(3):
-            async with session.get(url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
-                result["http_status"] = resp.status
-                if resp.status == 429:
-                    if attempt < 2:
-                        await asyncio.sleep(2 ** attempt + 1)
-                        continue
-                    result["error"] = "HTTP 429 (rate limit)"
-                    return result
-                if resp.status != 200:
-                    result["error"] = f"HTTP {resp.status}"
-                    return result
-                raw = await resp.read()
-                break
-        if not raw:
-            result["error"] = "Empty response body"
-            return result
-        # (продолжение ниже)
 
-            parsed = feedparser.parse(raw)
-            if not getattr(parsed, "entries", None):
-                # Пробуем починить XML
-                fixed = fix_xml(raw)
-                parsed = feedparser.parse(fixed)
+    http_status, raw, error = await fetch_feed(session, url)
+    result["http_status"] = http_status
 
-            if not getattr(parsed, "entries", None):
-                detail = str(parsed.bozo_exception)[:120] if getattr(parsed, "bozo", False) else "silent"
-                result["error"] = f"No entries ({detail})"
-                return result
+    if error:
+        result["error"] = error
+        return result
 
-            result["entries_count"] = len(parsed.entries)
-            latest_ts = None
-            for entry in parsed.entries[:10]:
-                ts = get_published_time(entry)
-                if ts and (latest_ts is None or ts > latest_ts):
-                    latest_ts = ts
-            if latest_ts is None:
-                result["status"] = "ok"
-                return result
-            age_days = (time.time() - latest_ts) / 86400
-            result["latest_entry_age_days"] = round(age_days, 1)
-            result["status"] = "stale" if age_days > STALE_THRESHOLD_DAYS else "ok"
-    except asyncio.TimeoutError:
-        result["error"] = "Timeout"
-    except aiohttp.ClientError as e:
-        result["error"] = f"Connection: {str(e)[:150]}"
-    except Exception as e:
-        result["error"] = str(e)[:200]
+    if not raw:
+        result["error"] = "Empty response body"
+        return result
+
+    # Сначала пробуем как есть
+    parsed = feedparser.parse(raw)
+    # Если 0 entries или bozo — чиним XML и пробуем ещё раз
+    if not getattr(parsed, "entries", None):
+        fixed = fix_xml(raw)
+        parsed = feedparser.parse(fixed)
+
+    if not getattr(parsed, "entries", None):
+        detail = "silent"
+        if getattr(parsed, "bozo", False) and parsed.bozo_exception:
+            detail = str(parsed.bozo_exception)[:120]
+        result["error"] = f"No entries ({detail})"
+        return result
+
+    result["entries_count"] = len(parsed.entries)
+
+    latest_ts = None
+    for entry in parsed.entries[:10]:
+        ts = get_published_time(entry)
+        if ts and (latest_ts is None or ts > latest_ts):
+            latest_ts = ts
+
+    if latest_ts is None:
+        result["status"] = "ok"
+        return result
+
+    age_days = (time.time() - latest_ts) / 86400
+    result["latest_entry_age_days"] = round(age_days, 1)
+    result["status"] = "stale" if age_days > STALE_THRESHOLD_DAYS else "ok"
     return result
 
 
@@ -159,6 +174,7 @@ async def main_async():
     if not os.path.exists("config.json"):
         print("❌ config.json не найден")
         sys.exit(1)
+
     with open("config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
     rss_feeds = config.get("rss_feeds", [])
@@ -185,7 +201,8 @@ async def main_async():
             extra = ""
             if r["status"] != "ok":
                 info = r.get("error") or (
-                    f"{r.get('latest_entry_age_days')} дн." if r.get("latest_entry_age_days") else ""
+                    f"{r.get('latest_entry_age_days')} дн."
+                    if r.get("latest_entry_age_days") else "?"
                 )
                 extra = f" — {info}"
             print(f"  [{i}/{len(rss_feeds)}] {icon} {r['source_name']}{extra}")
