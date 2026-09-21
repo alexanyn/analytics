@@ -33,6 +33,7 @@ HEADERS = {
 KNOWN_BLOCKED = {
     "economist.com", "ft.com", "theinformation.com", "semianalysis.com",
     "ben-evans.com", "brookings.edu", "carnegieendowment.org",
+    "provokemedia.com",
 }
 
 
@@ -45,15 +46,29 @@ def get_source_name(url: str) -> str:
 
 
 def fix_xml(content: bytes) -> bytes:
-    """Чинит типичные проблемы RSS: неопределённые entities, битые символы."""
-    # Заменяем необъявленные entities вроде &nbsp; &hellip; &mdash;
+    """Чинит типичные проблемы RSS: неопределённые entities, битые символы, CDATA."""
+    # BOM
+    if content.startswith(b"\xef\xbb\xbf"):
+        content = content[3:]
+    # Заменяем необъявленные entities
     content = re.sub(
         rb"&(?!(?:#\d+|#x[0-9a-fA-F]+|amp|lt|gt|quot|apos);)([a-zA-Z]+);",
         rb"\1",
         content,
     )
-    # Убираем управляющие символы, которые ломают XML
+    # Убираем одиночные & (не entity)
+    content = re.sub(rb"&(?!(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);)", b"&amp;", content)
+    # Убираем control-символы
     content = re.sub(rb"[\x00-\x08\x0B\x0C\x0E-\x1F]", b"", content)
+    # Спасаем одиночные < и > не в составе тега
+    content = re.sub(rb"<(?![a-zA-Z/!?])", b"&lt;", content)
+    # Пробуем декодировать как UTF-8 с игнором ошибок и пересобрать
+    try:
+        text = content.decode("utf-8", errors="replace")
+        text = text.encode("utf-8")
+        content = text
+    except Exception:
+        pass
     return content
 
 
@@ -88,15 +103,25 @@ async def check_one_feed(session: aiohttp.ClientSession, url: str) -> dict:
         "known_blocked": any(b in url for b in KNOWN_BLOCKED),
     }
     try:
-        async with session.get(url, timeout=aiohttp.ClientTimeout(total=25)) as resp:
-            result["http_status"] = resp.status
-            if resp.status != 200:
-                result["error"] = f"HTTP {resp.status}"
-                return result
-            raw = await resp.read()
-            if not raw:
-                result["error"] = "Empty response body"
-                return result
+        raw = None
+        for attempt in range(3):
+            async with session.get(url, timeout=aiohttp.ClientTimeout(total=40)) as resp:
+                result["http_status"] = resp.status
+                if resp.status == 429:
+                    if attempt < 2:
+                        await asyncio.sleep(2 ** attempt + 1)
+                        continue
+                    result["error"] = "HTTP 429 (rate limit)"
+                    return result
+                if resp.status != 200:
+                    result["error"] = f"HTTP {resp.status}"
+                    return result
+                raw = await resp.read()
+                break
+        if not raw:
+            result["error"] = "Empty response body"
+            return result
+        # (продолжение ниже)
 
             parsed = feedparser.parse(raw)
             if not getattr(parsed, "entries", None):
