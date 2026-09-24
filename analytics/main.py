@@ -22,7 +22,7 @@ logger = logging.getLogger("analytics_digest")
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", "%H:%M:%S"))
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # 4 воркера × 2.85 запроса/сек ≈ 11 запросов/сек — но rate limiter удержит в пределах 3/сек
 MAX_TRANSLATE_WORKERS = 3
@@ -45,9 +45,14 @@ def translate_one(article):
 
     title_ok = looks_translated(clean_title, t_title)
     summary_ok = looks_translated(article.summary, t_summary) if article.summary else True
-    ok = title_ok and summary_ok
+    # Считаем успехом, если заголовок переведён. Summary — бонус.
+    ok = title_ok
 
-    if not ok:
+    if not summary_ok:
+        # Не переведён summary — оставим пустым (не показывать английский текст)
+        t_summary = ""
+
+    if not title_ok:
         logger.debug(f"Translation miss: '{clean_title[:50]}' (t={title_ok}, s={summary_ok})")
 
     return article, t_title, t_summary, ok
@@ -122,6 +127,11 @@ async def main_async():
                 except Exception as e:
                     logger.debug(f"Future error: {e}")
         logger.info(f"Translation done in {time.time() - t_start:.1f}s ({ok_count}/{len(to_translate)} ok)")
+        try:
+            from .translators import _DEEPL_STATS
+            logger.info(f"DeepL stats: {_DEEPL_STATS}")
+        except Exception:
+            pass
     else:
         logger.info("All final articles already in cache")
 

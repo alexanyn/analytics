@@ -6,6 +6,9 @@ import requests
 
 logger = logging.getLogger("analytics_digest")
 
+# Статистика для диагностики
+_DEEPL_STATS = {"ok": 0, "empty": 0, "quota": 0, "error": 0}
+
 
 def _cyrillic_ratio(text: str) -> float:
     if not text:
@@ -41,10 +44,12 @@ def _translate_deepl(text: str) -> str:
                 if data.get("translations"):
                     t = data["translations"][0].get("text", "").strip()
                     if t:
+                        _DEEPL_STATS["ok"] += 1
                         return t
-                logger.debug(f"DeepL empty response for: {chunk[:50]}")
+                _DEEPL_STATS["empty"] += 1
                 return ""
             elif resp.status_code == 456:
+                _DEEPL_STATS["quota"] += 1
                 logger.warning("DeepL: квота исчерпана (500k/мес)")
                 return ""
             elif resp.status_code == 403:
@@ -67,6 +72,7 @@ def _translate_deepl(text: str) -> str:
             logger.debug(f"DeepL timeout (attempt {attempt+1})")
             time.sleep(2)
         except Exception as e:
+            _DEEPL_STATS["error"] += 1
             logger.warning(f"DeepL exception: {e}")
             return ""
     return ""
