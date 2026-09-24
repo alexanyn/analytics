@@ -1,25 +1,10 @@
 # analytics/translators.py
 import os
 import time
-import threading
 import logging
 import requests
 
 logger = logging.getLogger("analytics_digest")
-
-# ============ Rate limiter для deep-translator ============
-_TRANSLATE_LOCK = threading.Lock()
-_LAST_CALL = [0.0]
-_MIN_INTERVAL = 0.35  # ~2.85 запроса/сек — с запасом под лимит Google 5/сек
-
-
-def _rate_limit():
-    """Блокирует поток, пока не пройдёт минимальный интервал между запросами."""
-    with _TRANSLATE_LOCK:
-        elapsed = time.time() - _LAST_CALL[0]
-        if elapsed < _MIN_INTERVAL:
-            time.sleep(_MIN_INTERVAL - elapsed)
-        _LAST_CALL[0] = time.time()
 
 
 def _cyrillic_ratio(text: str) -> float:
@@ -29,68 +14,102 @@ def _cyrillic_ratio(text: str) -> float:
     return cyr / len(text)
 
 
-def _translate_via_deeptranslator(text: str) -> str:
-    """Перевод через deep-translator с глобальным rate limit и retry."""
-    from deep_translator import GoogleTranslator
+def _translate_deepl(text: str) -> str:
+    """Перевод через DeepL (Free tier: 500k символов/мес)."""
+    api_key = os.environ.get("DEEPL_API_KEY")
+    if not api_key:
+        return ""
+    # Free tier использует api-free.deepl.com, Pro — api.deepl.com
+    host = "api-free.deepl.com" if api_key.endswith(":fx") else "api.deepl.com"
+    url = f"https://{host}/v2/translate"
+    try:
+        resp = requests.post(
+            url,
+            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
+            json={"text": [text[:4500]], "target_lang": "RU"},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("translations"):
+                return data["translations"][0].get("text", "").strip()
+        elif resp.status_code == 456:
+            logger.warning("DeepL: квота исчерпана")
+        elif resp.status_code == 403:
+            logger.warning("DeepL: неверный API-ключ")
+        else:
+            logger.debug(f"DeepL HTTP {resp.status_code}: {resp.text[:150]}")
+    except Exception as e:
+        logger.debug(f"DeepL failed: {e}")
+    return ""
 
-    chunk = text[:4500]
-    for attempt in range(3):
-        _rate_limit()
+
+def _translate_gemini(text: str, is_summary: bool = False) -> str:
+    """Fallback — Gemini."""
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return ""
+    if is_summary:
+        prompt = (
+            "Сделай краткое резюме (1-2 предложения) на русском языке. "
+            "Без markdown, без транслитерации. Только чистый текст.\n\n"
+            f"Текст: {text[:800]}"
+        )
+    else:
+        prompt = (
+            "Переведи заголовок на русский язык. "
+            "Без markdown, без транслитерации, без названия источника. "
+            "Только чистый перевод.\n\n"
+            f"Текст: {text[:300]}"
+        )
+    url = (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        f"gemini-3.8-flash:generateContent?key={api_key}"
+    )
+    for attempt in range(2):
         try:
-            translated = GoogleTranslator(source="auto", target="ru").translate(chunk)
-            if translated and translated.strip() and translated.strip() != chunk.strip():
-                return translated.strip()
-        except Exception as e:
-            err = str(e).lower()
-            if "too many requests" in err or "server error" in err:
-                wait = 2 ** attempt + 1
-                logger.debug(f"deep-translator rate limit, waiting {wait}s...")
-                time.sleep(wait)
+            resp = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("candidates"):
+                    parts = data["candidates"][0].get("content", {}).get("parts", [])
+                    if parts:
+                        return parts[0].get("text", "").strip()
+            elif resp.status_code in (429, 500, 502, 503, 504):
+                time.sleep(3 + attempt * 2)
                 continue
-            logger.debug(f"deep-translator failed: {e}")
+            else:
+                return ""
+        except Exception as e:
+            logger.debug(f"Gemini failed: {e}")
             return ""
     return ""
 
 
-def _translate_combined_via_deeptranslator(title: str, summary: str) -> tuple[str, str]:
-    """Переводит title + summary одним запросом через разделитель."""
-    SEP = "\n||||\n"
-    combined = f"{title}{SEP}{summary}" if summary else title
-    translated = _translate_via_deeptranslator(combined)
-    if not translated:
-        return "", ""
-    if SEP.strip() in translated:
-        parts = translated.split(SEP.strip(), 1)
-        return parts[0].strip(), parts[1].strip() if len(parts) > 1 else ""
-    # Модель потеряла разделитель — вернём всё как title, summary пустой
-    return translated.strip(), ""
-
-
-def translate_and_summarize(text: str, is_summary: bool = False) -> str:
-    """Устаревшая функция для совместимости. Использует только deep-translator."""
-    if not text or len(text.strip()) < 3:
-        return text
-    if _cyrillic_ratio(text) > 0.3:
-        return text
-    translated = _translate_via_deeptranslator(text)
-    return translated if translated else text
-
-
 def translate_article(title: str, summary: str) -> tuple[str, str]:
-    """Основной API: переводит title и summary одним запросом. Возвращает (t_title, t_summary)."""
+    """Переводит через DeepL → Gemini fallback."""
     t_cyr = _cyrillic_ratio(title) > 0.3
     s_cyr = _cyrillic_ratio(summary) > 0.3 if summary else True
 
     if t_cyr and s_cyr:
-        return title, summary  # всё уже на русском
+        return title, summary
 
-    t_title, t_summary = _translate_combined_via_deeptranslator(
-        title if not t_cyr else "",
-        summary if not s_cyr else "",
-    )
+    final_title = title
+    final_summary = summary
 
-    # Если один из блоков был уже русским — вернём оригинал
-    final_title = title if t_cyr else (t_title or title)
-    final_summary = summary if s_cyr else (t_summary or summary)
+    if not t_cyr:
+        final_title = _translate_deepl(title) or _translate_gemini(title, is_summary=False) or title
+
+    if not s_cyr and summary:
+        final_summary = _translate_deepl(summary) or _translate_gemini(summary, is_summary=True) or summary
 
     return final_title, final_summary
+
+
+def translate_and_summarize(text: str, is_summary: bool = False) -> str:
+    """Совместимость со старым API."""
+    if not text or len(text.strip()) < 3:
+        return text
+    if _cyrillic_ratio(text) > 0.3:
+        return text
+    return _translate_deepl(text) or _translate_gemini(text, is_summary) or text
