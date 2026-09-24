@@ -13,6 +13,7 @@ from .dedup import deduplicate, load_recent_titles, add_to_cache
 from .classifiers import classify_articles
 from .translators import translate_and_summarize
 from .senders import send_to_telegram
+from .formatters import is_junk_article
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
 from .text_utils import normalize_for_dedup, looks_translated
@@ -95,6 +96,12 @@ async def main_async():
     if not deduped:
         log_metrics("empty_no_deduplicated")
         return
+
+    # Отсеиваем анонсы, тесты и мусорные статьи
+    before_junk = len(deduped)
+    deduped = [a for a in deduped if not is_junk_article(a)]
+    if before_junk != len(deduped):
+        logger.info(f"Junk filter: {before_junk} → {len(deduped)}")
 
     categorized = classify_articles(deduped)
     max_per_cat = config.digest.max_items_per_category
