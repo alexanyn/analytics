@@ -11,24 +11,25 @@ from .config import load_config
 from .collectors import collect_articles
 from .dedup import deduplicate, load_recent_titles, add_to_cache
 from .classifiers import classify_articles
-from .translators import translate_and_summarize
+from .translators import translate_article
 from .senders import send_to_telegram
-from .formatters import is_junk_article
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
 from .text_utils import normalize_for_dedup, looks_translated
+from .formatters import is_junk_article
 
 logger = logging.getLogger("analytics_digest")
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", "%H:%M:%S"))
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
-MAX_TRANSLATE_WORKERS = 5
+# 4 воркера × 2.85 запроса/сек ≈ 11 запросов/сек — но rate limiter удержит в пределах 3/сек
+MAX_TRANSLATE_WORKERS = 4
 
 
 def translate_one(article):
-    """Стрипает суффикс источника, переводит, проверяет результат."""
+    """Переводит статью (title + summary) одним запросом."""
     from .formatters import strip_source_suffix_from_title, get_source_name
     try:
         source = get_source_name(article.feed_url)
@@ -37,26 +38,17 @@ def translate_one(article):
         clean_title = article.title
 
     try:
-        t_title = translate_and_summarize(clean_title, is_summary=False)
-        t_summary = translate_and_summarize(article.summary, is_summary=True)
+        t_title, t_summary = translate_article(clean_title, article.summary or "")
     except Exception as e:
         logger.debug(f"Translate error: {e}")
         t_title, t_summary = clean_title, article.summary
 
     title_ok = looks_translated(clean_title, t_title)
-    summary_ok = looks_translated(article.summary, t_summary) or not article.summary
-
-    # Один retry для заголовка если провалился
-    if not title_ok:
-        time.sleep(1)
-        t_title_retry = translate_and_summarize(clean_title, is_summary=False)
-        if looks_translated(clean_title, t_title_retry):
-            t_title = t_title_retry
-            title_ok = True
-
+    summary_ok = looks_translated(article.summary, t_summary) if article.summary else True
     ok = title_ok and summary_ok
+
     if not ok:
-        logger.warning(f"Translation issue: '{clean_title[:60]}' (title_ok={title_ok}, summary_ok={summary_ok})")
+        logger.debug(f"Translation miss: '{clean_title[:50]}' (t={title_ok}, s={summary_ok})")
 
     return article, t_title, t_summary, ok
 
@@ -97,7 +89,6 @@ async def main_async():
         log_metrics("empty_no_deduplicated")
         return
 
-    # Отсеиваем анонсы, тесты и мусорные статьи
     before_junk = len(deduped)
     deduped = [a for a in deduped if not is_junk_article(a)]
     if before_junk != len(deduped):
