@@ -22,10 +22,10 @@ logger = logging.getLogger("analytics_digest")
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s", "%H:%M:%S"))
 logger.addHandler(handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # 4 воркера × 2.85 запроса/сек ≈ 11 запросов/сек — но rate limiter удержит в пределах 3/сек
-MAX_TRANSLATE_WORKERS = 4
+MAX_TRANSLATE_WORKERS = 3
 
 
 def translate_one(article):

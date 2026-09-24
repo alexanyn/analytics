@@ -15,32 +15,60 @@ def _cyrillic_ratio(text: str) -> float:
 
 
 def _translate_deepl(text: str) -> str:
-    """Перевод через DeepL (Free tier: 500k символов/мес)."""
+    """Перевод через DeepL Free (500k символов/мес). С retry и логированием."""
     api_key = os.environ.get("DEEPL_API_KEY")
     if not api_key:
         return ""
-    # Free tier использует api-free.deepl.com, Pro — api.deepl.com
     host = "api-free.deepl.com" if api_key.endswith(":fx") else "api.deepl.com"
     url = f"https://{host}/v2/translate"
-    try:
-        resp = requests.post(
-            url,
-            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
-            json={"text": [text[:4500]], "target_lang": "RU"},
-            timeout=15,
-        )
-        if resp.status_code == 200:
-            data = resp.json()
-            if data.get("translations"):
-                return data["translations"][0].get("text", "").strip()
-        elif resp.status_code == 456:
-            logger.warning("DeepL: квота исчерпана")
-        elif resp.status_code == 403:
-            logger.warning("DeepL: неверный API-ключ")
-        else:
-            logger.debug(f"DeepL HTTP {resp.status_code}: {resp.text[:150]}")
-    except Exception as e:
-        logger.debug(f"DeepL failed: {e}")
+
+    # Обрезаем слишком длинные тексты (DeepL free имеет лимит ~5000 символов на запрос)
+    chunk = text[:5000]
+
+    for attempt in range(3):
+        try:
+            resp = requests.post(
+                url,
+                headers={
+                    "Authorization": f"DeepL-Auth-Key {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={"text": [chunk], "target_lang": "RU", "preserve_formatting": False},
+                timeout=20,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                if data.get("translations"):
+                    t = data["translations"][0].get("text", "").strip()
+                    if t:
+                        return t
+                logger.debug(f"DeepL empty response for: {chunk[:50]}")
+                return ""
+            elif resp.status_code == 456:
+                logger.warning("DeepL: квота исчерпана (500k/мес)")
+                return ""
+            elif resp.status_code == 403:
+                logger.error("DeepL: неверный API-ключ")
+                return ""
+            elif resp.status_code == 429:
+                wait = 2 ** attempt + 1
+                logger.debug(f"DeepL rate limit, waiting {wait}s... (attempt {attempt+1})")
+                time.sleep(wait)
+                continue
+            elif resp.status_code >= 500:
+                wait = 2 ** attempt
+                logger.debug(f"DeepL HTTP {resp.status_code}, waiting {wait}s...")
+                time.sleep(wait)
+                continue
+            else:
+                logger.warning(f"DeepL HTTP {resp.status_code}: {resp.text[:200]} for text: {chunk[:80]}")
+                return ""
+        except requests.exceptions.Timeout:
+            logger.debug(f"DeepL timeout (attempt {attempt+1})")
+            time.sleep(2)
+        except Exception as e:
+            logger.warning(f"DeepL exception: {e}")
+            return ""
     return ""
 
 
