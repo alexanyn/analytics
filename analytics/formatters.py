@@ -422,12 +422,13 @@ def article_to_html(article: Article, cache: dict) -> str:
     summary = strip_trailing_source(summary, source)
     summary = truncate_at_sentence(summary, max_len=600)
 
-    # Если summary всё ещё на английском (много латиницы) и это длинный текст — отбрасываем
-    if summary and len(summary) > 60:
+    # Если summary на английском — убираем полностью (не показываем английский текст)
+    if summary and len(summary) > 20:
         latin = sum(1 for c in summary if "a" <= c.lower() <= "z")
         cyr = sum(1 for c in summary if "а" <= c.lower() <= "я" or c == "ё")
-        if latin > 0 and cyr / max(len(summary), 1) < 0.3:
-            summary = ""  # перевод не сработал — не показываем английский текст
+        total = max(len(summary), 1)
+        if latin / total > 0.7 and cyr / total < 0.15:
+            summary = ""
 
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     summary = summary.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
