@@ -43,14 +43,14 @@
 <body>
 <header>
   <h1>Analytics · Мониторинг</h1>
-  <div class="meta">Обновлено 23.09.2026 07:01 МСК</div>
+  <div class="meta">Обновлено 24.09.2026 07:01 МСК</div>
 </header>
 
 <div class="strip">
-  <div class="cell"><span class="big mono">4</span><span class="label">Прогонов за 7 дней</span></div>
+  <div class="cell"><span class="big mono">5</span><span class="label">Прогонов за 7 дней</span></div>
   <div class="cell"><span class="big mono">100%</span><span class="label">Успешных</span></div>
-  <div class="cell"><span class="big mono">23.5</span><span class="label">Ср. статей / дайджест</span></div>
-  <div class="cell"><span class="big mono">94</span><span class="label">Всего статей</span></div>
+  <div class="cell"><span class="big mono">22.8</span><span class="label">Ср. статей / дайджест</span></div>
+  <div class="cell"><span class="big mono">114</span><span class="label">Всего статей</span></div>
 </div>
 
 <main>
@@ -63,7 +63,8 @@
     <h2><span class="eyebrow">02</span> Последние прогоны</h2>
     <table>
       <thead><tr><th>Время</th><th>Статус</th><th class="num">Статей</th><th class="num">Длит.</th><th>Ошибки</th></tr></thead>
-      <tbody><tr><td class='mono'>23.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>36с</td><td class='dim'>—</td></tr>
+      <tbody><tr><td class='mono'>24.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>20</td><td class='mono num'>40с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>23.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>36с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>22.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>26</td><td class='mono num'>33с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>18.09 18:21</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>4</td><td class='mono num'>24с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>18.09 17:33</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>39</td><td class='mono num'>56с</td><td class='dim'>—</td></tr>
@@ -104,10 +105,10 @@
 new Chart(document.getElementById('itemsChart'), {
   type: 'line',
   data: {
-    labels: ["18.09", "22.09", "23.09"],
+    labels: ["18.09", "22.09", "23.09", "24.09"],
     datasets: [{
       label: 'Статей в дайджесте',
-      data: [43, 26, 25],
+      data: [43, 26, 25, 20],
       borderColor: '#F0A83C',
       backgroundColor: 'rgba(240,168,60,0.08)',
       borderWidth: 2, pointRadius: 3, fill: true, tension: 0.25,
