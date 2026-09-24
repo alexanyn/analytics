@@ -210,6 +210,16 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     text = re.sub(r"([.,!?;:])\1+", r"\1", text)
 
+    # Markdown-артефакты от Gemini
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)   # **bold** → bold
+    text = re.sub(r"__(.+?)__", r"\1", text)         # __italic__
+    text = re.sub(r"\*(.+?)\*", r"\1", text)         # *italic*
+    text = re.sub(r"`(.+?)`", r"\1", text)           # `code`
+    text = re.sub(r"^#+\s*", "", text)               # # header
+
+    # Транслитерация в скобках: (Privet, mir!)
+    text = re.sub(r"\s*\([A-Z][a-z]+(?:[,\s]+[a-z]+)+\)", "", text)
+
     text = text.strip()
     if text and text[0].islower():
         text = text[0].upper() + text[1:]
