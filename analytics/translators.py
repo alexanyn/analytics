@@ -1,12 +1,30 @@
 # analytics/translators.py
 import os
 import time
+import threading
 import logging
 import requests
 
 logger = logging.getLogger("analytics_digest")
 
-_STATS = {"deepl_ok": 0, "gemini_ok": 0, "googletrans_ok": 0, "fail": 0}
+_STATS = {"googletrans_ok": 0, "deepl_ok": 0, "gemini_ok": 0, "fail": 0}
+
+# Rate limiter для googletrans (Google Translate: 5 запросов/сек лимит)
+_LOCK = threading.Lock()
+_LAST_CALL = [0.0]
+_MIN_INTERVAL = 0.35  # ~2.85 запроса/сек
+
+# Флаги доступности внешних сервисов (если упали — не тратим время)
+_DEEPL_AVAILABLE = [True]
+_GEMINI_AVAILABLE = [True]
+
+
+def _rate_limit():
+    with _LOCK:
+        elapsed = time.time() - _LAST_CALL[0]
+        if elapsed < _MIN_INTERVAL:
+            time.sleep(_MIN_INTERVAL - elapsed)
+        _LAST_CALL[0] = time.time()
 
 
 def _cyrillic_ratio(text: str) -> float:
@@ -20,126 +38,138 @@ def _is_russian(text: str) -> bool:
     return _cyrillic_ratio(text) > 0.3
 
 
-def _translate_deepl(text: str) -> str:
-    """DeepL Free tier — основной переводчик."""
-    api_key = os.environ.get("DEEPL_API_KEY")
-    if not api_key:
-        return ""
-    host = "api-free.deepl.com" if api_key.endswith(":fx") else "api.deepl.com"
-    url = f"https://{host}/v2/translate"
-    chunk = text[:5000]
+# =============== 1. GOOGLETRANS (основной) ===============
 
-    for attempt in range(2):
-        try:
-            resp = requests.post(
-                url,
-                headers={
-                    "Authorization": f"DeepL-Auth-Key {api_key}",
-                    "Content-Type": "application/json",
-                },
-                json={"text": [chunk], "target_lang": "RU", "preserve_formatting": False},
-                timeout=20,
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                if data.get("translations"):
-                    t = data["translations"][0].get("text", "").strip()
-                    if t:
-                        return t
+def _translate_googletrans(text: str) -> str:
+    """Google Translate через googletrans — работает из GitHub Actions."""
+    if not text:
+        return ""
+    try:
+        from googletrans import Translator
+        for attempt in range(3):
+            _rate_limit()
+            try:
+                t = Translator().translate(text[:4500], dest="ru").text
+                if t and t.strip() and t.strip() != text.strip():
+                    return t.strip()
                 return ""
-            elif resp.status_code == 456:
-                logger.warning("DeepL: квота исчерпана")
+            except Exception as e:
+                err = str(e).lower()
+                if "too many" in err or "429" in err:
+                    time.sleep(2 ** attempt)
+                    continue
+                logger.debug(f"googletrans inner: {e}")
                 return ""
-            elif resp.status_code == 403:
-                logger.warning("DeepL: неверный API-ключ")
-                return ""
-            elif resp.status_code == 429:
-                time.sleep(2 ** attempt + 1)
-                continue
-            elif resp.status_code >= 500:
-                time.sleep(2 ** attempt)
-                continue
-            else:
-                logger.debug(f"DeepL HTTP {resp.status_code}: {resp.text[:150]}")
-                return ""
-        except Exception as e:
-            logger.debug(f"DeepL error: {e}")
-            return ""
+    except Exception as e:
+        logger.debug(f"googletrans import/fatal: {e}")
     return ""
 
 
+# =============== 2. DEEPL (если работает) ===============
+
+def _translate_deepl(text: str) -> str:
+    """DeepL — может не работать из GitHub Actions (IP-блок)."""
+    if not _DEEPL_AVAILABLE[0]:
+        return ""
+    api_key = os.environ.get("DEEPL_API_KEY")
+    if not api_key:
+        _DEEPL_AVAILABLE[0] = False
+        return ""
+
+    host = "api-free.deepl.com" if api_key.strip().endswith(":fx") else "api.deepl.com"
+    url = f"https://{host}/v2/translate"
+    chunk = text[:5000]
+
+    try:
+        resp = requests.post(
+            url,
+            headers={
+                "Authorization": f"DeepL-Auth-Key {api_key.strip()}",
+                "Content-Type": "application/json",
+            },
+            json={"text": [chunk], "target_lang": "RU", "preserve_formatting": False},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("translations"):
+                t = data["translations"][0].get("text", "").strip()
+                if t:
+                    return t
+            return ""
+        if resp.status_code == 403:
+            _DEEPL_AVAILABLE[0] = False
+            logger.warning("DeepL: 403 (IP-блок или неверный ключ). Отключаю DeepL до конца прогона.")
+            return ""
+        if resp.status_code == 456:
+            _DEEPL_AVAILABLE[0] = False
+            logger.warning("DeepL: квота исчерпана. Отключаю DeepL.")
+            return ""
+        logger.debug(f"DeepL HTTP {resp.status_code}")
+    except Exception as e:
+        logger.debug(f"DeepL exception: {e}")
+    return ""
+
+
+# =============== 3. GEMINI (крайний fallback) ===============
+
 def _translate_gemini(text: str, is_summary: bool = False) -> str:
-    """Gemini — fallback."""
+    if not _GEMINI_AVAILABLE[0]:
+        return ""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
+        _GEMINI_AVAILABLE[0] = False
         return ""
-    if is_summary:
-        prompt = (
-            "Переведи на русский язык (кратко, 1-2 предложения). Без markdown. "
-            "Только чистый текст.\n\n" f"{text[:800]}"
-        )
-    else:
-        prompt = (
-            "Переведи заголовок на русский язык. Без markdown, без транслитерации, "
-            "без названия источника. Только чистый перевод.\n\n" f"{text[:300]}"
-        )
+
+    prompt = (
+        "Переведи на русский язык (кратко, 1-2 предложения). Без markdown. Только чистый текст.\n\n"
+        if is_summary
+        else "Переведи заголовок на русский язык. Без markdown, без транслитерации, без названия источника. Только чистый перевод.\n\n"
+    ) + f"Текст: {text[:500]}"
+
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"gemini-3.8-flash:generateContent?key={api_key}"
     )
-    for attempt in range(2):
-        try:
-            resp = requests.post(
-                url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                if data.get("candidates"):
-                    parts = data["candidates"][0].get("content", {}).get("parts", [])
-                    if parts:
-                        return parts[0].get("text", "").strip()
-            elif resp.status_code in (429, 500, 502, 503, 504):
-                time.sleep(3 + attempt * 2)
-                continue
-            else:
-                return ""
-        except Exception:
-            return ""
+    try:
+        resp = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            if data.get("candidates"):
+                parts = data["candidates"][0].get("content", {}).get("parts", [])
+                if parts:
+                    return parts[0].get("text", "").strip()
+        elif resp.status_code in (429, 503):
+            _GEMINI_AVAILABLE[0] = False
+            logger.warning(f"Gemini: {resp.status_code} — отключаю Gemini до конца прогона")
+    except Exception as e:
+        logger.debug(f"Gemini: {e}")
     return ""
 
 
-def _translate_googletrans(text: str) -> str:
-    """googletrans — последний fallback."""
-    try:
-        from googletrans import Translator
-        t = Translator().translate(text[:4000], dest="ru").text
-        return t.strip() if t else ""
-    except Exception as e:
-        logger.debug(f"googletrans failed: {e}")
-        return ""
-
+# =============== Оркестратор ===============
 
 def _translate(text: str, is_summary: bool = False) -> str:
-    """Пробует DeepL → Gemini → googletrans."""
+    """googletrans → DeepL → Gemini."""
     if not text or len(text.strip()) < 3:
         return ""
 
-    # DeepL
+    # 1. googletrans (основной — работает из GitHub)
+    t = _translate_googletrans(text)
+    if t:
+        _STATS["googletrans_ok"] += 1
+        return t
+
+    # 2. DeepL (может не работать, но не тратим время если упал)
     t = _translate_deepl(text)
     if t:
         _STATS["deepl_ok"] += 1
         return t
 
-    # Gemini
+    # 3. Gemini
     t = _translate_gemini(text, is_summary=is_summary)
     if t:
         _STATS["gemini_ok"] += 1
-        return t
-
-    # googletrans
-    t = _translate_googletrans(text)
-    if t:
-        _STATS["googletrans_ok"] += 1
         return t
 
     _STATS["fail"] += 1
@@ -147,10 +177,8 @@ def _translate(text: str, is_summary: bool = False) -> str:
 
 
 def translate_article(title: str, summary: str) -> tuple[str, str]:
-    """Переводит title и summary. Возвращает (t_title, t_summary)."""
     t_cyr = _is_russian(title)
     s_cyr = _is_russian(summary) if summary else True
-
     if t_cyr and s_cyr:
         return title, summary
 
@@ -171,7 +199,6 @@ def translate_article(title: str, summary: str) -> tuple[str, str]:
 
 
 def translate_and_summarize(text: str, is_summary: bool = False) -> str:
-    """Совместимость со старым API."""
     if not text or len(text.strip()) < 3:
         return text
     if _is_russian(text):

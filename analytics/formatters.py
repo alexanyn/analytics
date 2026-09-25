@@ -149,6 +149,11 @@ def post_process_text(text: str) -> str:
         " ", text, flags=re.IGNORECASE,
     )
 
+    # Chatham House внутренние артефакты: "thilton. drupal", "sseth. drupal@c"
+    text = re.sub(r"\b[a-z]{2,8}\.\s*drupal[@\w\.]*\s*", " ", text)
+    text = re.sub(r"\bAudio\s+[a-z]{2,8}\.\s*", " ", text)
+    text = re.sub(r"\bАудио\s+[a-z]{2,8}\.\s*", " ", text)
+
     # Event-маркеры
     text = re.sub(r"\s*Анонимно\s*\(\s*не\s+проверено\s*\)\s*", " ", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*Anonymous\s*\(\s*not\s+verified\s*\)\s*", " ", text, flags=re.IGNORECASE)
@@ -157,6 +162,12 @@ def post_process_text(text: str) -> str:
     text = re.sub(
         r"\s*\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}\s*г?\.?\s*"
         r"[-–—]?\s*с\s*\d{1,2}:\d{2}\s+до\s+\d{1,2}:\d{2}[^.]*\.",
+        " ", text, flags=re.IGNORECASE,
+    )
+
+    # Одиночные даты в начале текста (после точки): ". 25 сентября 2026 г."
+    text = re.sub(
+        r"(?<=\.)\s+\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}\s*г?\.?\s*",
         " ", text, flags=re.IGNORECASE,
     )
 
@@ -395,14 +406,22 @@ def is_junk_article(article: Article) -> bool:
     if "чатем-хаус и интернет" in text or "chatham house and internet" in text:
         return True
 
-    # Заголовок — только имя автора (2-3 слова, все с заглавной, без глаголов и пунктуации)
+    # Заголовок — только имя автора (2-4 слова, все с заглавной, без глаголов)
     words = t_stripped.split()
-    if 2 <= len(words) <= 3 and len(t_stripped) < 40:
-        if all(w[0].isupper() for w in words if w):
-            if not re.search(r"[.,:;!?\-–—]", t_stripped):
-                # Нет глагольных маркеров
-                if not re.search(r"\b(?:is|are|was|were|has|have|will|can|about|over|with|from|of|in|on|to)\b", t_stripped.lower()):
-                    return True
+    if 2 <= len(words) <= 4 and len(t_stripped) < 50:
+        # Все слова с заглавной буквы или всё короткое
+        all_caps = all(w[0].isupper() for w in words if w and w[0].isalpha())
+        if all_caps:
+            # Нет глаголов / служебных слов / пунктуации
+            has_punct = bool(re.search(r"[.,:;!?\-–—()«»]", t_stripped))
+            has_verb = bool(re.search(
+                r"\b(?:is|are|was|were|has|have|will|can|about|over|with|from|of|in|on|to|"
+                r"the|a|an|and|or|but|for|by|at|as|no|not|new|how|why|what|when)\b",
+                t_stripped.lower()
+            ))
+            # И это короткое описание (< 60 символов) или похоже на имя человека
+            if not has_punct and not has_verb and len(t_stripped) < 45:
+                return True
 
     return False
 
