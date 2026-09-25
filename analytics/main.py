@@ -25,7 +25,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 # 4 воркера × 2.85 запроса/сек ≈ 11 запросов/сек — но rate limiter удержит в пределах 3/сек
-MAX_TRANSLATE_WORKERS = 3
+MAX_TRANSLATE_WORKERS = 5
 
 
 def translate_one(article):
