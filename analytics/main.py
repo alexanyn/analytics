@@ -128,8 +128,8 @@ async def main_async():
                     logger.debug(f"Future error: {e}")
         logger.info(f"Translation done in {time.time() - t_start:.1f}s ({ok_count}/{len(to_translate)} ok)")
         try:
-            from .translators import _DEEPL_STATS
-            logger.info(f"DeepL stats: {_DEEPL_STATS}")
+            from .translators import _STATS
+            logger.info(f"Translation stats: {_STATS}")
         except Exception:
             pass
     else:
