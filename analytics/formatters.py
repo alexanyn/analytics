@@ -422,6 +422,47 @@ def is_junk_article(article: Article) -> bool:
     if re.search(r"\baudio\s+[a-z]{3,15}\b", text):
         return True
 
+    # === СТРАНИЦЫ ВЫПУСКОВ / НОМЕРОВ / СБОРНИКОВ ===
+    # Пример: "Volume 26, Issue 19", "Том 26, выпуск 19"
+    issue_title_patterns = [
+        r"^volume\s+\d+\s*[,\-–—]?\s*(?:issue\s+\d+)?\s*$",
+        r"^vol\.?\s+\d+\s*[,\-–—]?\s*(?:no\.?\s+\d+|issue\s+\d+)?\s*$",
+        r"^том\s+\d+\s*[,\-–—]?\s*(?:выпуск\s+\d+)?\s*$",
+        r"^том\s+\d+\s*,?\s*выпуск\s+\d+\s*$",
+        r"^issue\s+\d+\s*$",
+        r"^выпуск\s+\d+\s*$",
+        r"^weekly\s+edition\s*$",
+        r"^еженедельн\w+\s+выпуск\s*$",
+        r"^china\s+brief\s*$",
+        r"^russia\s+brief\s*$",
+    ]
+    for pattern in issue_title_patterns:
+        if re.match(pattern, t_lower):
+            return True
+
+    # URL-паттерны выпусков (страницы сборок)
+    link = (article.link or "").lower()
+    issue_url_patterns = [
+        r"/cb-volume/",
+        r"/volume[-_]\d+/",
+        r"/vol[-_]\d+/",
+        r"/issue[-_]\d+/",
+        r"/issues?/\d+",
+        r"/weekly-edition",
+        r"/digest/\d+",
+    ]
+    for pattern in issue_url_patterns:
+        if re.search(pattern, link):
+            return True
+
+    # Содержимое: короткое описание + много ссылок на статьи этого выпуска
+    # Если summary содержит список других статей — это оглавление
+    if t_lower in ("volume\s", "том\s") or re.search(r"^(?:volume|том)\s+\d+", text[:30]):
+        # В summary нет осмысленного текста, только оглавление
+        if len(summary_stripped := (article.summary or "").strip()) < 200:
+            if "in this issue" in text or "в этом выпуске" in text or "table of contents" in text:
+                return True
+
     # Тесты
     if re.match(r"^(?:отсечной|контрольный)\s+тест\b", t_stripped.lower()):
         return True
