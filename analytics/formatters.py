@@ -445,21 +445,28 @@ def is_junk_article(article: Article) -> bool:
     if "чатем-хаус и интернет" in text or "chatham house and internet" in text:
         return True
 
-    # Заголовок — только имя автора (2-4 слова, все с заглавной, без глаголов)
+    # Заголовок — только имя автора (2-3 слова, каждое похоже на имя человека)
+    # Пример: "Лаурентиу Плешка", "John Smith", "Maria Garcia"
     words = t_stripped.split()
-    if 2 <= len(words) <= 4 and len(t_stripped) < 50:
-        # Все слова с заглавной буквы или всё короткое
-        all_caps = all(w[0].isupper() for w in words if w and w[0].isalpha())
-        if all_caps:
-            # Нет глаголов / служебных слов / пунктуации
-            has_punct = bool(re.search(r"[.,:;!?\-–—()«»]", t_stripped))
-            has_verb = bool(re.search(
+    if 2 <= len(words) <= 3 and len(t_stripped) < 40:
+        # Каждое слово: первая заглавная, остальные строчные (не аббревиатура)
+        looks_like_name = all(
+            len(w) >= 2 and w[0].isupper() and (len(w) == 1 or w[1:].islower())
+            for w in words if w and w[0].isalpha()
+        )
+        if looks_like_name:
+            # Длина каждого слова ≤ 12 (имена редко длиннее, а термины бывают)
+            short_words = all(len(w) <= 12 for w in words)
+            # Нет пунктуации, цифр, служебных слов
+            has_punct = bool(re.search(r"[.,:;!?\-–—()«»&/]", t_stripped))
+            has_digit = bool(re.search(r"\d", t_stripped))
+            has_stop = bool(re.search(
                 r"\b(?:is|are|was|were|has|have|will|can|about|over|with|from|of|in|on|to|"
-                r"the|a|an|and|or|but|for|by|at|as|no|not|new|how|why|what|when)\b",
+                r"the|a|an|and|or|but|for|by|at|as|no|not|new|how|why|what|when|"
+                r"faces|toward|towards|during|after|before|between|against|under|into)\b",
                 t_stripped.lower()
             ))
-            # И это короткое описание (< 60 символов) или похоже на имя человека
-            if not has_punct and not has_verb and len(t_stripped) < 45:
+            if not has_punct and not has_digit and not has_stop and short_words:
                 return True
 
     return False
