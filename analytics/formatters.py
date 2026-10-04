@@ -378,10 +378,49 @@ def get_category_russian_name(category: str) -> str:
 
 
 def is_junk_article(article: Article) -> bool:
-    """Отсеивает анонсы, тесты и статьи-однофамильцы."""
+    """Отсеивает анонсы, подкасты, тесты и статьи-однофамильцы."""
     title = article.title or ""
     text = (title + " " + (article.summary or "")).lower()
     t_stripped = title.strip()
+    t_lower = t_stripped.lower()
+
+    # === ПОДКАСТЫ, АУДИО, ВИДЕО, ВЕБИНАРЫ ===
+    podcast_patterns = [
+        r"\bpodcast\b",
+        r"\bподкаст\w*\b",
+        r"^live podcast",
+        r"^live webinar",
+        r"^live webcast",
+        r"\baudio brief\b",
+        r"\baudio version\b",
+        r"\baudio interview\b",
+        r"^audio\s",
+        r"^аудио\s",
+        r"\bepisode\s+\d+",
+        r"\bэпизод\s+\d+",
+        r"\bep\.\s*\d+",
+        r"\bвыпуск\s+\d+",
+        r"\blisten to (?:the|this|our|my)\b",
+        r"\bin this episode\b",
+        r"\bв этом выпуске\b",
+        r"\btune in\b",
+        r"\bwebinar\b",
+        r"\bвебинар\w*\b",
+        r"\bwebcast\b",
+        r"\broundtable discussion\b",
+        r"\bкруглый стол\b",
+    ]
+    for pattern in podcast_patterns:
+        if re.search(pattern, text):
+            return True
+
+    # Chatham House / другие: артефакты аудио-записей
+    # Пример: "thilton. drupal 25 сентября 2026 г." — метка аудио-эпизода
+    if re.search(r"\b[a-z]{3,10}\.\s*drupal", text):
+        return True
+    # Общая метка аудио в конце: "... — Audio <uuid>. drupal <дата>"
+    if re.search(r"\baudio\s+[a-z]{3,15}\b", text):
+        return True
 
     # Тесты
     if re.match(r"^(?:отсечной|контрольный)\s+тест\b", t_stripped.lower()):
