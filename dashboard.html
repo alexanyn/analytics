@@ -43,14 +43,14 @@
 <body>
 <header>
   <h1>Analytics · Мониторинг</h1>
-  <div class="meta">Обновлено 04.10.2026 07:01 МСК</div>
+  <div class="meta">Обновлено 05.10.2026 07:01 МСК</div>
 </header>
 
 <div class="strip">
   <div class="cell"><span class="big mono">8</span><span class="label">Прогонов за 7 дней</span></div>
   <div class="cell"><span class="big mono">100%</span><span class="label">Успешных</span></div>
-  <div class="cell"><span class="big mono">15.4</span><span class="label">Ср. статей / дайджест</span></div>
-  <div class="cell"><span class="big mono">123</span><span class="label">Всего статей</span></div>
+  <div class="cell"><span class="big mono">16.1</span><span class="label">Ср. статей / дайджест</span></div>
+  <div class="cell"><span class="big mono">129</span><span class="label">Всего статей</span></div>
 </div>
 
 <main>
@@ -63,7 +63,8 @@
     <h2><span class="eyebrow">02</span> Последние прогоны</h2>
     <table>
       <thead><tr><th>Время</th><th>Статус</th><th class="num">Статей</th><th class="num">Длит.</th><th>Ошибки</th></tr></thead>
-      <tbody><tr><td class='mono'>04.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>6</td><td class='mono num'>23с</td><td class='dim'>—</td></tr>
+      <tbody><tr><td class='mono'>05.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>7</td><td class='mono num'>23с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>04.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>6</td><td class='mono num'>23с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>03.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>20</td><td class='mono num'>38с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>02.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>21</td><td class='mono num'>36с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>01.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>20</td><td class='mono num'>34с</td><td class='dim'>—</td></tr>
@@ -76,8 +77,7 @@
 <tr><td class='mono'>25.09 07:03</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>165с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>24.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>20</td><td class='mono num'>40с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>23.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>36с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>22.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>26</td><td class='mono num'>33с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>18.09 18:21</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>4</td><td class='mono num'>24с</td><td class='dim'>—</td></tr></tbody>
+<tr><td class='mono'>22.09 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>26</td><td class='mono num'>33с</td><td class='dim'>—</td></tr></tbody>
     </table>
   </section>
   
@@ -106,10 +106,10 @@
 new Chart(document.getElementById('itemsChart'), {
   type: 'line',
   data: {
-    labels: ["27.09", "28.09", "29.09", "30.09", "01.10", "02.10", "03.10", "04.10"],
+    labels: ["28.09", "29.09", "30.09", "01.10", "02.10", "03.10", "04.10", "05.10"],
     datasets: [{
       label: 'Статей в дайджесте',
-      data: [1, 8, 23, 24, 20, 21, 20, 6],
+      data: [8, 23, 24, 20, 21, 20, 6, 7],
       borderColor: '#F0A83C',
       backgroundColor: 'rgba(240,168,60,0.08)',
       borderWidth: 2, pointRadius: 3, fill: true, tension: 0.25,
