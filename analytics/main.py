@@ -48,9 +48,10 @@ def translate_one(article):
     # Считаем успехом, если заголовок переведён. Summary — бонус.
     ok = title_ok
 
-    if not summary_ok:
-        # Не переведён summary — оставим пустым (не показывать английский текст)
-        t_summary = ""
+    # Если summary не переведён, но есть оригинал — оставляем оригинал (с пометкой [EN])
+    # Это лучше, чем пустая карточка
+    if not summary_ok and article.summary:
+        t_summary = "[EN] " + article.summary.strip()
 
     if not title_ok:
         logger.debug(f"Translation miss: '{clean_title[:50]}' (t={title_ok}, s={summary_ok})")

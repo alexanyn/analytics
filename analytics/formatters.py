@@ -528,13 +528,7 @@ def article_to_html(article: Article, cache: dict) -> str:
     summary = strip_trailing_source(summary, source)
     summary = truncate_at_sentence(summary, max_len=600)
 
-    # Если summary на английском — убираем полностью (не показываем английский текст)
-    if summary and len(summary) > 20:
-        latin = sum(1 for c in summary if "a" <= c.lower() <= "z")
-        cyr = sum(1 for c in summary if "а" <= c.lower() <= "я" or c == "ё")
-        total = max(len(summary), 1)
-        if latin / total > 0.7 and cyr / total < 0.15:
-            summary = ""
+    # (английский summary больше не удаляем — показываем с пометкой [EN])
 
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     summary = summary.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -545,7 +539,9 @@ def article_to_html(article: Article, cache: dict) -> str:
     html = f"<b>{title}</b>"
     if summary:
         html += f"\n\n{summary}"
-    html += "\n\n"
+        html += "\n\n"
+    else:
+        html += "\n\n"
     if link and (link.startswith("http://") or link.startswith("https://")):
         safe_link = link.replace('"', "&quot;")
         html += f'<i><a href="{safe_link}">{source_html}</a></i>'

@@ -7,7 +7,7 @@ import requests
 
 logger = logging.getLogger("analytics_digest")
 
-_STATS = {"googletrans_ok": 0, "deepl_ok": 0, "gemini_ok": 0, "fail": 0}
+_STATS = {"googletrans_ok": 0, "deepl_ok": 0, "gemini_ok": 0, "mymemory_ok": 0, "fail": 0}
 
 # Rate limiter для googletrans (Google Translate: 5 запросов/сек лимит)
 _LOCK = threading.Lock()
@@ -108,6 +108,45 @@ def _translate_deepl(text: str) -> str:
         logger.debug(f"DeepL HTTP {resp.status_code}")
     except Exception as e:
         logger.debug(f"DeepL exception: {e}")
+    return ""
+
+
+
+
+def _translate_mymemory(text: str) -> str:
+    """MyMemory — публичный API без ключа, 5000 символов/день анонимно."""
+    if not text:
+        return ""
+    try:
+        # Разбиваем длинные тексты (лимит MyMemory ~500 байт на запрос для анонимного)
+        chunks = []
+        current = ""
+        for sentence in text.replace("! ", ". ").replace("? ", ". ").split(". "):
+            if len(current) + len(sentence) < 450:
+                current += sentence + ". "
+            else:
+                if current:
+                    chunks.append(current.strip())
+                current = sentence + ". "
+        if current:
+            chunks.append(current.strip())
+
+        parts = []
+        for chunk in chunks[:5]:  # не больше 5 фрагментов
+            resp = requests.get(
+                "https://api.mymemory.translated.net/get",
+                params={"q": chunk[:490], "langpair": "en|ru"},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                t = data.get("responseData", {}).get("translatedText", "")
+                if t and "MYMEMORY WARNING" not in t:
+                    parts.append(t)
+        if parts:
+            return " ".join(parts)
+    except Exception as e:
+        logger.debug(f"MyMemory failed: {e}")
     return ""
 
 
