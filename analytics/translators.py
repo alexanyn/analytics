@@ -7,6 +7,14 @@ import requests
 
 logger = logging.getLogger("analytics_digest")
 
+# Автоопределение среды
+import os as _os
+IS_GITHUB_ACTIONS = _os.environ.get("GITHUB_ACTIONS") == "true"
+
+# Флаги: если сервис упал — не тратим время на повторные попытки
+_DEEPL_DEAD = [False]
+_GEMINI_DEAD = [False]
+
 _STATS = {"googletrans_ok": 0, "deepl_ok": 0, "gemini_ok": 0, "mymemory_ok": 0, "fail": 0}
 
 # Rate limiter для googletrans (Google Translate: 5 запросов/сек лимит)
@@ -98,8 +106,8 @@ def _translate_deepl(text: str) -> str:
                     return t
             return ""
         if resp.status_code == 403:
-            _DEEPL_AVAILABLE[0] = False
-            logger.warning("DeepL: 403 (IP-блок или неверный ключ). Отключаю DeepL до конца прогона.")
+            _DEEPL_DEAD[0] = True
+            logger.warning("DeepL: 403 (IP-блок или неверный ключ). Отключаю до конца прогона.")
             return ""
         if resp.status_code == 456:
             _DEEPL_AVAILABLE[0] = False
@@ -189,29 +197,39 @@ def _translate_gemini(text: str, is_summary: bool = False) -> str:
 # =============== Оркестратор ===============
 
 def _translate(text: str, is_summary: bool = False) -> str:
-    """googletrans → DeepL → Gemini."""
+    """Перевод с автоопределением среды:
+    - GitHub Actions: googletrans → DeepL → MyMemory → Gemini
+    - Локально:       DeepL → googletrans → MyMemory → Gemini
+    """
     if not text or len(text.strip()) < 3:
         return ""
 
-    # 1. googletrans (основной — работает из GitHub)
-    t = _translate_googletrans(text)
-    if t:
-        _STATS["googletrans_ok"] += 1
-        return t
+    if IS_GITHUB_ACTIONS:
+        order = [
+            ("googletrans", lambda t: _translate_googletrans(t)),
+            ("deepl",       lambda t: _translate_deepl(t)),
+            ("mymemory",    lambda t: _translate_mymemory(t)),
+            ("gemini",      lambda t: _translate_gemini(t, is_summary=is_summary)),
+        ]
+    else:
+        order = [
+            ("deepl",       lambda t: _translate_deepl(t)),
+            ("googletrans", lambda t: _translate_googletrans(t)),
+            ("mymemory",    lambda t: _translate_mymemory(t)),
+            ("gemini",      lambda t: _translate_gemini(t, is_summary=is_summary)),
+        ]
 
-    # 2. DeepL (может не работать, но не тратим время если упал)
-    t = _translate_deepl(text)
-    if t:
-        _STATS["deepl_ok"] += 1
-        return t
+    for name, func in order:
+        try:
+            t = func(text)
+        except Exception as e:
+            logger.debug(f"{name} raised: {e}")
+            t = ""
+        if t:
+            _STATS[f"{name}_ok"] = _STATS.get(f"{name}_ok", 0) + 1
+            return t
 
-    # 3. Gemini
-    t = _translate_gemini(text, is_summary=is_summary)
-    if t:
-        _STATS["gemini_ok"] += 1
-        return t
-
-    _STATS["fail"] += 1
+    _STATS["fail"] = _STATS.get("fail", 0) + 1
     return ""
 
 

@@ -85,6 +85,17 @@ _EXTRA_TITLE_SUFFIXES = [
     "PRovoke Media",
     "Spin Sucks",
     "O'Dwyer's",
+    "Stockholm International Peace Research Institute",
+    "SIPRI",
+    "The Jamestown Foundation",
+    "Brookings Institution",
+    "Carnegie Endowment for International Peace",
+    "Belfer Center",
+    "Hoover Institution",
+    "Council on Foreign Relations",
+    "Atlantic Council",
+    "Wilson Center",
+    "German Marshall Fund",
     "Carbon Brief",
     "BloombergNEF",
     "IEA",
@@ -341,21 +352,29 @@ def strip_trailing_source(text: str, source_name: str) -> str:
     return text.strip()
 
 
-def truncate_at_sentence(text: str, max_len: int = 600) -> str:
+def truncate_at_sentence(text: str, max_len: int = 900) -> str:
+    """Обрезает текст, стараясь закончить на целом предложении."""
     if not text:
         return ""
     if len(text) <= max_len:
         return text
+
     cut = text[:max_len]
+
+    # Ищем последний . ! ? с последующим пробелом или концом
     matches = list(re.finditer(r"[.!?](?:\s|$)", cut))
     if matches:
         last_end = matches[-1].end()
-        if last_end >= max_len * 0.5:
+        if last_end >= max_len * 0.4:
             return cut[:last_end].strip()
+
+    # Не нашли точку — берём последний пробел, но НЕ добавляем "…"
+    # (лучше оборвать молча, чем показывать кривое многоточие)
     last_space = cut.rfind(" ")
-    if last_space >= max_len * 0.5:
-        return cut[:last_space].rstrip(" ,;:—–-") + "…"
-    return cut.rstrip() + "…"
+    if last_space >= max_len * 0.4:
+        return cut[:last_space].rstrip(" ,;:—–-")
+
+    return cut.rstrip()
 
 
 def get_source_name(feed_url: str) -> str:
@@ -535,6 +554,12 @@ def article_to_html(article: Article, cache: dict) -> str:
     source_html = source.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     link = article.link.strip()
+
+    # Если summary == title (или это лишь «[EN] title») — не дублируем
+    title_clean = re.sub(r"^\[EN\]\s*", "", title, flags=re.IGNORECASE).strip().lower()
+    summary_clean = re.sub(r"^\[EN\]\s*", "", summary, flags=re.IGNORECASE).strip().lower() if summary else ""
+    if summary_clean and title_clean == summary_clean:
+        summary = ""
 
     html = f"<b>{title}</b>"
     if summary:
