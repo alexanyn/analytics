@@ -1,44 +1,4 @@
 {
-  "values": {
-    "timestamp": 1791097279.6704996,
-    "category": "GEOPOLITICS",
-    "translated_title": "\"Ценности\".- База данных SIPRI о поставках оружия",
-    "translated_summary": "",
-    "original_title": "\"Values\". - SIPRI Arms Transfers Database - armstrade.sipri.org",
-    "translation_ok": true
-  },
-  "a conversation with prime minister jonas gahr støre of norway and president alexander stubb of finland": {
-    "timestamp": 1791097279.6941898,
-    "category": "GEOPOLITICS",
-    "translated_title": "Беседа с премьер-министром Норвегии Йонасом Гаром Стёре и президентом Финляндии Александром Стуббом",
-    "translated_summary": "",
-    "original_title": "A Conversation With Prime Minister Jonas Gahr Støre of Norway and President Alexander Stubb of Finland - Council on Foreign Relations (CFR)",
-    "translation_ok": true
-  },
-  "co26209 reintegration indonesia s next frontier against terrorist recidivism": {
-    "timestamp": 1791097280.062178,
-    "category": "GEOPOLITICS",
-    "translated_title": "СО26209 |Реинтеграция: следующий рубеж Индонезии в борьбе с рецидивизмом терроризма - Школа международных исследований С. Раджаратнама (RSIS)",
-    "translated_summary": "",
-    "original_title": "CO26209 | Reintegration: Indonesia’s Next Frontier Against Terrorist Recidivism - S. Rajaratnam School of International Studies (RSIS)",
-    "translation_ok": true
-  },
-  "visit to rsis by xiamen university": {
-    "timestamp": 1791097280.744531,
-    "category": "GEOPOLITICS",
-    "translated_title": "Посещение RSIS представителями Сямэньского университета - Школы международных исследований С. Раджаратнама (RSIS)",
-    "translated_summary": "",
-    "original_title": "Visit to RSIS by Xiamen University - S. Rajaratnam School of International Studies (RSIS)",
-    "translation_ok": true
-  },
-  "géopolitique le domaine confisqué": {
-    "timestamp": 1791097282.0729723,
-    "category": "GEOPOLITICS",
-    "translated_title": "Геополитика, конфискованная территория",
-    "translated_summary": "Журналисты и эксперты, выходцы из одних и тех же школ, знакомые с властными кругами, пропагандируют манихейское прочтение крупных международных событий, не оставляя места инакомыслящим голосам.К счастью, теперь есть инструмент, позволяющий противостоять времени: наше «Руководство (…)\n/ <a href=\"https://www.monde-diplomatique.fr/index/pays/monde\" rel=\"tag\">Мир</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/geopolitique\" rel=\"tag\">Геополитика</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/relinter\" rel=\"tag\">Международные отношения</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/nordsud\" rel=\"tag\">Отношения Север-Юг</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/diplomatie\" rel=\"tag\">Дипломатия</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/diplo\" rel=\"tag\">О «<small class=\"fine\"> </small>Diplo<small class=\"fine\"> </small>”</a>",
-    "original_title": "Géopolitique, le domaine confisqué",
-    "translation_ok": true
-  },
   "bonding through crises with nonbank financial institutions": {
     "timestamp": 1791183680.3498375,
     "category": "ECONOMICS",
@@ -1045,6 +1005,78 @@
     "translated_title": "Попытка Китая определить «глобальный Юг»",
     "translated_summary": "Пекин принял свое собственное, совсем другое определение термина..",
     "original_title": "China’s Bid to Define the ‘Global South’",
+    "translation_ok": true
+  },
+  "the size and speed of tariff pass through into consumer prices": {
+    "timestamp": 1791788480.2457154,
+    "category": "ECONOMICS",
+    "translated_title": "Размер и скорость перехода тарифов на потребительские цены",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiiAFBVV95cUxNdXBTNXdXeGpubWJEZmNaNkVHaFdPc21UejRxcFlGTkVTOEYxQ3M0T0FDSFZnQzRqQUlwamJNNzdFb3BXdEViZjh0ZmZMdWJ4LUxOclowQ0Z5V1VJSFo0ak83eTNmbjNMdGI2R2EtSlZ1SktSVExfa1d6bmdfSk1jSjNDZkRJZ0JS?oc=5\" target=\"_blank\">The size and speed of tariff pass through into consumer prices</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CEPR</font>",
+    "original_title": "The size and speed of tariff pass through into consumer prices - CEPR",
+    "translation_ok": true
+  },
+  "financial sanctions and the global payments network": {
+    "timestamp": 1791788480.83802,
+    "category": "ECONOMICS",
+    "translated_title": "Финансовые санкции и глобальная платежная сеть",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMihAFBVV95cUxNcDV1WlowNFBBTE1lRE1QeUNPVUpHWXFzdlNXTWRxWmVSdTNGNUNPaHR6QmtZTmQ3OFpRS1N1OHlWR1FmRUVmUmVnYW1kNFk5RlUtSUhiUGFMRGVCZ0tVVEVpMjhPMzZIdkw4NkxVSFBiQnM4MDBTUGdUQ3prQURsWmZGWlI?oc=5\" target=\"_blank\">Financial sanctions and the global payments network</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CEPR</font>",
+    "original_title": "Financial sanctions and the global payments network - CEPR",
+    "translation_ok": true
+  },
+  "iea statement on responding to the global diesel market situation": {
+    "timestamp": 1791788481.0355287,
+    "category": "ENERGY",
+    "translated_title": "Заявление МЭА о реакции на ситуацию на мировом рынке дизельного топлива - МЭА",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMilAFBVV95cUxPc05ZWUdWSTh5TEU4bjNJVHVLa196ME1XWFdibDBmQ0VlTlp4Vm9leFVKR2RDOV9EZlNBSDItZVlZTXp0czdYTnpvSVp0RXdvVkQxQjdGNUlqNm51OHpSeS02ejhxWVlKcGhpMlBRSTV6ZXB5Wkt6R2ltWm1DYXM1bW5ySzF6Z1FQVFhIMVp0cVR6WDZ1?oc=5\" target=\"_blank\">IEA statement on responding to the global diesel market situation</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">IEA - International Energy Agency</font>",
+    "original_title": "IEA statement on responding to the global diesel market situation - IEA - International Energy Agency",
+    "translation_ok": true
+  },
+  "values": {
+    "timestamp": 1791788481.6695879,
+    "category": "GEOPOLITICS",
+    "translated_title": "\"Ценности\".- База данных SIPRI о поставках оружия",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiigFBVV95cUxNLXNFWVBmSm1IdEJQMWhDRmNZS3ZsQkpOeElhbGItM0xhTXdmQlNaYm1UYWY3RXpwTFptVHhIVTh4NzBxc1F1aVc3TFNySG9UZnFfZUtoWlphM09qV09KWHpTRTk2dUdXbzgxYWVmNGMtN1ZBcEJuQkI2azFkcEVNeWd1MDhob1dNdkE?oc=5\" target=\"_blank\">\"Values\". - SIPRI Arms Transfers Database</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Stockholm International Peace Research Institute</font>",
+    "original_title": "\"Values\". - SIPRI Arms Transfers Database - Stockholm International Peace Research Institute",
+    "translation_ok": true
+  },
+  "armstrade sipri org armstrade htm": {
+    "timestamp": 1791788481.8258877,
+    "category": "GEOPOLITICS",
+    "translated_title": "армторговля.сипри.org/armtrade/htm - База данных SIPRI по передаче оружия",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMikwFBVV95cUxORW9YRGFpb2JoSXFfMUhXQXNFUFBnSUNBdzFFM05RUlRqZjZXTV90djc3QUFsYVRtV3l1YW5XdlYzOWg2NHVIUkZmZnpGdlUzekpKeG1vc0FsWDY5aDVHZEgzSUpDNWtPTnhaOEZVU0Q5Q1RBZzJ6dC1IZHpYbUl3aklwenRtSEM4OUowX1hFUkctZ1E?oc=5\" target=\"_blank\">armstrade . sipri . org / armstrade / htm - SIPRI Arms Transfers Database</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Stockholm International Peace Research Institute</font>",
+    "original_title": "armstrade . sipri . org / armstrade / htm - SIPRI Arms Transfers Database - Stockholm International Peace Research Institute",
+    "translation_ok": true
+  },
+  "can singapore matchmake its way to population growth": {
+    "timestamp": 1791788482.7485325,
+    "category": "GEOPOLITICS",
+    "translated_title": "Сможет ли Сингапур добиться роста населения?",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMinwFBVV95cUxNOXlRaUNVZTVOM2JqbGJabEI2TDV3NzZrcXRuNkozVGk3anQwcG03LW5UVzRFUTVfY1d2U01nb1dqVWJGRTM5eWJjQ18xUm5kdHBKcEEyTlR0VHNKZEhtSW5Jb05rMnE5aWo1UWlDQ1dKWXM3OEFwZFRKNllYRUtIb1hrYkZjMF9fZVBGZjhLblVKdDJHNXZWcnVhUUx5ZVE?oc=5\" target=\"_blank\">Can Singapore matchmake its way to population growth?</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Lowy Institute</font>",
+    "original_title": "Can Singapore matchmake its way to population growth? - Lowy Institute",
+    "translation_ok": true
+  },
+  "bilateral aid in retreat in southeast asia and the poorest will pay": {
+    "timestamp": 1791788483.9776666,
+    "category": "GEOPOLITICS",
+    "translated_title": "Двусторонняя помощь в Юго-Восточной Азии сокращается, и беднейшие заплатят",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiswFBVV95cUxPWVI2Z2pBRHlYdWN5MHJJSldHdVdtNzMxRkJTdlNKYldNMEdPV3BjYVRzbEhJVlowbVFld2lGMXBOeXB5NVRCbWpSUGxfYlhXd0FMWEd5d0FWS3llaHFWZHBEaFk4RDkwMEJmSDZFaXZFVDFKSE9HUkF4VGExUTFlWnhDeEllNWI5TC03ejBIYVJaZF92YVFZcC1IRFlQRkF0dGI2MDNrbjBKSk9nMFM0WERSdw?oc=5\" target=\"_blank\">Bilateral aid in retreat in Southeast Asia, and the poorest will pay</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Lowy Institute</font>",
+    "original_title": "Bilateral aid in retreat in Southeast Asia, and the poorest will pay - Lowy Institute",
+    "translation_ok": true
+  },
+  "what washington got wrong about the houthis and what it must do now": {
+    "timestamp": 1791788484.0213082,
+    "category": "SECURITY",
+    "translated_title": "Что Вашингтон ошибся в отношении хуситов и что ему следует делать сейчас",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMipwFBVV95cUxObks2UkotNks1bEJ4VjJUYzhITUNtaEY0emY2bFhrVEk3cUdNd2p2c283aFFaWnktQ1I1eFlSLTZDLUVjMkdBVERhNVRRVEUtQWY2dC1fMkpyaktkd3UzckRxdF9xZXMtWmw5bTNNZkRjV3BnOHNyOXB4cmlKOHpjdlczS1gteVdzZlBJT0I5MjR6am5EY1Y0dk1aTmZseVAyZGFTR1lOMA?oc=5\" target=\"_blank\">What Washington Got Wrong About the Houthis—and What It Must Do Now</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Lawfare</font>",
+    "original_title": "What Washington Got Wrong About the Houthis—and What It Must Do Now - Lawfare",
+    "translation_ok": true
+  },
+  "la chine veut elle gagner en iran": {
+    "timestamp": 1791788484.7288725,
+    "category": "GEOPOLITICS",
+    "translated_title": "Хочет ли Китай «победить» в Иране?",
+    "translated_summary": "Медиа-вселенная напоминает «перевернутый мир», описанный уругвайским писателем Эдуардо Галеано.Чем больше Соединенные Штаты попирают международное право, тем больше Китай обвиняют в угрозах.Таким образом, конфликт в Иране, спровоцированный Вашингтоном и Тель-Авивом, но который приведет к (…)\n/ <a href=\"https://www.monde-diplomatique.fr/index/pays/chine\" rel=\"tag\">Китай</a>, <a href=\"https://www.monde-diplomatique.fr/index/pays/iran\" rel=\"tag\">Иран</a>, <a href=\"https://www.monde-diplomatique.fr/index/pays/etatsunis\" rel=\"tag\">США</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/imperialisme\" rel=\"tag\">Империализм</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/geopolitique\" rel=\"tag\">Геополитика</a>",
+    "original_title": "La Chine veut-elle « gagner » en Iran ?",
     "translation_ok": true
   }
 }
