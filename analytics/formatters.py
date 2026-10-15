@@ -476,7 +476,7 @@ def is_junk_article(article: Article) -> bool:
 
     # Содержимое: короткое описание + много ссылок на статьи этого выпуска
     # Если summary содержит список других статей — это оглавление
-    if t_lower in ("volume\s", "том\s") or re.search(r"^(?:volume|том)\s+\d+", text[:30]):
+    if t_lower in ("volume", "том") or re.search(r"^(?:volume|том)\s+\d+", text[:30]):
         # В summary нет осмысленного текста, только оглавление
         if len(summary_stripped := (article.summary or "").strip()) < 200:
             if "in this issue" in text or "в этом выпуске" in text or "table of contents" in text:
