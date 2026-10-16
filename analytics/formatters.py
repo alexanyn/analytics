@@ -137,6 +137,13 @@ def post_process_text(text: str) -> str:
 
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z])", r"\1 ", text)
 
+    # Jamestown: "Title The" / "Title The Jamestown Foundation" в конце
+    text = re.sub(r"\s+The\s+(?:Jamestown\s+Foundation)?\s*$", "", text)
+
+    # Carbon Brief: "Сообщение X ... впервые появилось на сайте"
+    text = re.sub(r"\s*[Сс]ообщение\s+[^.]{0,300}?\s*$", " ", text)
+    text = re.sub(r"\s*впервые\s+появил(?:ась|ся)\s+на\s+сайте\s*.*$", " ", text, flags=re.IGNORECASE)
+
     # WordPress-хвосты
     text = re.sub(r"\s*[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
     text = re.sub(r"\s+[Пп]ост\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
@@ -241,6 +248,26 @@ def post_process_text(text: str) -> str:
 
     # Транслитерация в скобках: (Privet, mir!)
     text = re.sub(r"\s*\([A-Z][a-z]+(?:[,\s]+[a-z]+)+\)", "", text)
+
+    # ===== ФИНАЛЬНЫЕ ПРАВКИ =====
+
+    # U.S./U.K./U.N./U.E. → US/UK/UN/EU (без \b на конце — ломается на дефисе)
+    text = re.sub(r"\bU\.\s*S\.", "US", text)
+    text = re.sub(r"\bU\.\s*K\.", "UK", text)
+    text = re.sub(r"\bU\.\s*N\.", "UN", text)
+    text = re.sub(r"\bU\.\s*E\.", "EU", text)
+
+    # Jamestown: убираем "The" / "The Jamestown Foundation" в самом конце
+    text = re.sub(r"\s+The\s+Jamestown\s+Foundation\s*$", "", text)
+    text = re.sub(r"\s+The\s*$", "", text)
+
+    # Carbon Brief: обрезаем хвост "Сообщение X ... впервые появилось на сайте"
+    text = re.sub(r"\s*Сообщение\s+[^.]{0,400}?впервые\s+появилось\s+на\s+сайте\s*\.?\s*$", "", text)
+
+    # Схлопываем лишние пробелы
+    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"\s+\.", ".", text)
+    text = re.sub(r"\.\s*\.", ".", text)
 
     text = text.strip()
     if text and text[0].islower():
@@ -349,9 +376,6 @@ def strip_trailing_source(text: str, source_name: str) -> str:
         return text
     pattern = r"[\s\-–—.,:]*" + re.escape(source_name) + r"\s*[.!?]*\s*$"
     text = re.sub(pattern, "", text, flags=re.IGNORECASE)
-    return text.strip()
-
-
 def truncate_at_sentence(text: str, max_len: int = 900) -> str:
     """Обрезает текст, стараясь закончить на целом предложении."""
     if not text:
@@ -533,6 +557,10 @@ def is_junk_article(article: Article) -> bool:
 
 
 def article_to_html(article: Article, cache: dict) -> str:
+    # Защита: если после очистки ничего не осталось — вернуть пустую строку
+    _sanity_title = (article.title or "").strip()
+    if not _sanity_title:
+        return ""
     cached = cache.get(normalize_for_dedup(article.title), {})
     title = cached.get("translated_title", article.title)
     summary = cached.get("translated_summary", article.summary)

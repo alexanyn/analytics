@@ -38,6 +38,9 @@ def _migrate_and_filter(data: dict) -> dict:
             trans = v.get("translated_title", "")
             if orig and trans and not looks_translated(orig, trans):
                 ok = False
+            # Дополнительно: выкидываем записи с [EN]-маркерами или мусором
+            if trans.startswith("[EN]") or "| Center for" in trans:
+                ok = False
         if not ok:
             continue
         v["translation_ok"] = True
