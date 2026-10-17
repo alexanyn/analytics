@@ -137,6 +137,8 @@ def post_process_text(text: str) -> str:
 
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z])", r"\1 ", text)
 
+    # Убираем префиксы "Скачать:" / "Download:"
+    text = re.sub(r"^\s*(?:Скачать|Download)\s*:\s*", "", text, flags=re.IGNORECASE)
     # Jamestown: "Title The" / "Title The Jamestown Foundation" в конце
     text = re.sub(r"\s+The\s+(?:Jamestown\s+Foundation)?\s*$", "", text)
 
@@ -500,7 +502,7 @@ def is_junk_article(article: Article) -> bool:
 
     # Содержимое: короткое описание + много ссылок на статьи этого выпуска
     # Если summary содержит список других статей — это оглавление
-    if t_lower in ("volume", "том") or re.search(r"^(?:volume|том)\s+\d+", text[:30]):
+    if t_lower in ("volume", "том") or re.search(r"^(?:volume|том)\s+\d+", text[:30]) or re.search(r"^(?:том|volume)\s+\d+\s+(?:выпуск|issue)\s+\d+", t_lower):
         # В summary нет осмысленного текста, только оглавление
         if len(summary_stripped := (article.summary or "").strip()) < 200:
             if "in this issue" in text or "в этом выпуске" in text or "table of contents" in text:
@@ -530,27 +532,25 @@ def is_junk_article(article: Article) -> bool:
         return True
 
     # Заголовок — только имя автора (2-3 слова, каждое похоже на имя человека)
-    # Пример: "Лаурентиу Плешка", "John Smith", "Maria Garcia"
     words = t_stripped.split()
-    if 2 <= len(words) <= 3 and len(t_stripped) < 40:
-        # Каждое слово: первая заглавная, остальные строчные (не аббревиатура)
+    if 2 <= len(words) <= 3 and len(t_stripped) < 45:
+        # Каждое слово с заглавной буквы
         looks_like_name = all(
-            len(w) >= 2 and w[0].isupper() and (len(w) == 1 or w[1:].islower())
+            len(w) >= 2 and w[0].isupper()
             for w in words if w and w[0].isalpha()
         )
         if looks_like_name:
-            # Длина каждого слова ≤ 12 (имена редко длиннее, а термины бывают)
-            short_words = all(len(w) <= 12 for w in words)
-            # Нет пунктуации, цифр, служебных слов
             has_punct = bool(re.search(r"[.,:;!?\-–—()«»&/]", t_stripped))
             has_digit = bool(re.search(r"\d", t_stripped))
+            # Английские и русские служебные слова, исключающие имя
             has_stop = bool(re.search(
                 r"\b(?:is|are|was|were|has|have|will|can|about|over|with|from|of|in|on|to|"
                 r"the|a|an|and|or|but|for|by|at|as|no|not|new|how|why|what|when|"
-                r"faces|toward|towards|during|after|before|between|against|under|into)\b",
+                r"faces|toward|towards|during|after|before|between|against|under|into|"
+                r"и|в|во|не|что|он|на|я|с|со|как|а|то|все|она|так|его|но|да|ты|к|у|же|вы|за|бы|по|только|ее|мне|было|вот|от|меня|еще|нет|о|из|ему|теперь|когда|даже|ну|вдруг|ли|если|уже|или|ни|быть|был|него|до|вас|нибудь|опять|уж|вам|ведь|там|потом|себя|ничего|ей|может|они|тут|где|есть|надо|ней|для|мы|тебя|их|чем|была|сам|чтоб|без|будто|чего|раз|тоже|себе|под|будет|ж|тогда|кто|этот|того|потому|этого|какой|совсем|ним|здесь|этом|один|почти|мой|тем|чтобы|нее|сейчас|были|куда|зачем|всех|никогда|можно|при|наконец|два|об|другой|хоть|после|над|больше|тот|через|эти|нас|про|всего|них|какая|много|разве|три|эту|моя|впрочем|хорошо|свою|этой|перед|иногда|лучше|чуть|том|нельзя|такой|им|более|всегда|конечно|всю|между)\b",
                 t_stripped.lower()
             ))
-            if not has_punct and not has_digit and not has_stop and short_words:
+            if not has_punct and not has_digit and not has_stop:
                 return True
 
     return False
