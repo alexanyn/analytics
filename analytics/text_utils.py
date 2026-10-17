@@ -1,3 +1,6 @@
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 # analytics/text_utils.py
 import re
 
