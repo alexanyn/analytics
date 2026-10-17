@@ -16,7 +16,7 @@ from .translators import translate_article
 from .senders import send_to_telegram
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
-from .text_utils import normalize_for_dedup, looks_translated
+from .text_utils import normalize_for_dedup, looks_translated, fetch_description_from_html
 from .formatters import is_junk_article
 
 logger = logging.getLogger("analytics_digest")
@@ -97,7 +97,14 @@ def translate_one(article):
         clean_title, article.summary or "", source
     )
 
-    # Если после чистки summary пустой — переводим только заголовок
+    # Если после чистки summary пустой — пробуем вытащить из HTML статьи
+    if not clean_summary:
+        logger.debug(f"No summary in RSS for: {clean_title[:50]}. Fetching HTML...")
+        clean_summary = fetch_description_from_html(article.link)
+        if clean_summary:
+            logger.debug(f"Fetched from HTML: {clean_summary[:50]}...")
+
+    # Если всё равно пусто — переводим только заголовок
     if not clean_summary:
         try:
             t_title = translate_article(clean_title, "")[0]
