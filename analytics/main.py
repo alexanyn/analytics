@@ -103,6 +103,8 @@ def translate_one(article):
         clean_summary = fetch_description_from_html(article.link)
         if clean_summary:
             logger.debug(f"Fetched from HTML: {clean_summary[:50]}...")
+            # Обрезаем до 900 символов, чтобы не перегружать переводчик
+            clean_summary = clean_summary[:900]
 
     # Если всё равно пусто — переводим только заголовок
     if not clean_summary:
