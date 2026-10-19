@@ -54,7 +54,7 @@
     "https://www.ragan.com/feed/",
     "https://spinsucks.com/feed/"
   ],
-  "max_age_days": 1,
+  "max_age_days": 3,
   "dedup": {
     "recent_titles_window_hours": 168
   }

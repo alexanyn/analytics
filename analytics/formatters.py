@@ -86,6 +86,8 @@ _EXTRA_TITLE_SUFFIXES = [
     "Spin Sucks",
     "O'Dwyer's",
     "Stockholm International Peace Research Institute",
+    "Клуб «Валдай»",
+    "Valdai Club",
     "SIPRI",
     "The Jamestown Foundation",
     "Brookings Institution",
@@ -423,138 +425,123 @@ def get_category_russian_name(category: str) -> str:
 
 
 def is_junk_article(article: Article) -> bool:
-    """Отсеивает анонсы, подкасты, тесты и статьи-однофамильцы."""
+    """Отсеивает анонсы, тесты, страницы навигации и статьи-однофамильцы."""
     title = article.title or ""
     text = (title + " " + (article.summary or "")).lower()
     t_stripped = title.strip()
     t_lower = t_stripped.lower()
 
-    # === ПОДКАСТЫ, АУДИО, ВИДЕО, ВЕБИНАРЫ ===
+    # 1. Подкасты, аудио, видео
     podcast_patterns = [
-        r"\bpodcast\b",
-        r"\bподкаст\w*\b",
-        r"^live podcast",
-        r"^live webinar",
-        r"^live webcast",
-        r"\baudio brief\b",
-        r"\baudio version\b",
-        r"\baudio interview\b",
-        r"^audio\s",
-        r"^аудио\s",
-        r"\bepisode\s+\d+",
-        r"\bэпизод\s+\d+",
-        r"\bep\.\s*\d+",
-        r"\bвыпуск\s+\d+",
-        r"\blisten to (?:the|this|our|my)\b",
-        r"\bin this episode\b",
-        r"\bв этом выпуске\b",
-        r"\btune in\b",
-        r"\bwebinar\b",
-        r"\bвебинар\w*\b",
-        r"\bwebcast\b",
-        r"\broundtable discussion\b",
-        r"\bкруглый стол\b",
+        r"\bpodcast\b", r"\bподкаст\w*\b", r"^live podcast", r"^live webinar", r"^live webcast",
+        r"\baudio brief\b", r"\baudio version\b", r"\baudio interview\b", r"^audio\s", r"^аудио\s",
+        r"\bepisode\s+\d+", r"\bэпизод\s+\d+", r"\bep\.\s*\d+", r"\bвыпуск\s+\d+",
+        r"\blisten to (?:the|this|our|my)\b", r"\bin this episode\b", r"\bв этом выпуске\b",
+        r"\btune in\b", r"\bwebinar\b", r"\bвебинар\w*\b", r"\bwebcast\b",
+        r"\broundtable discussion\b", r"\bкруглый стол\b",
     ]
     for pattern in podcast_patterns:
         if re.search(pattern, text):
             return True
 
-    # Chatham House / другие: артефакты аудио-записей
-    # Пример: "thilton. drupal 25 сентября 2026 г." — метка аудио-эпизода
+    # 2. Артефакты Chatham House / аудио
     if re.search(r"\b[a-z]{3,10}\.\s*drupal", text):
         return True
-    # Общая метка аудио в конце: "... — Audio <uuid>. drupal <дата>"
     if re.search(r"\baudio\s+[a-z]{3,15}\b", text):
         return True
 
-    # === СТРАНИЦЫ ВЫПУСКОВ / НОМЕРОВ / СБОРНИКОВ ===
-    # Пример: "Volume 26, Issue 19", "Том 26, выпуск 19"
+    # 3. Страницы выпусков (Volume X, Issue Y)
     issue_title_patterns = [
         r"^volume\s+\d+\s*[,\-–—]?\s*(?:issue\s+\d+)?\s*$",
         r"^vol\.?\s+\d+\s*[,\-–—]?\s*(?:no\.?\s+\d+|issue\s+\d+)?\s*$",
         r"^том\s+\d+\s*[,\-–—]?\s*(?:выпуск\s+\d+)?\s*$",
-        r"^том\s+\d+\s*,?\s*выпуск\s+\d+\s*$",
-        r"^issue\s+\d+\s*$",
-        r"^выпуск\s+\d+\s*$",
-        r"^weekly\s+edition\s*$",
-        r"^еженедельн\w+\s+выпуск\s*$",
-        r"^china\s+brief\s*$",
-        r"^russia\s+brief\s*$",
+        r"^issue\s+\d+\s*$", r"^выпуск\s+\d+\s*$",
+        r"^weekly\s+edition\s*$", r"^еженедельн\w+\s+выпуск\s*$",
+        r"^china\s+brief\s*$", r"^russia\s+brief\s*$",
+        r"^том\s+\d+\s+выпуск\s+\d+\s*$",
     ]
     for pattern in issue_title_patterns:
         if re.match(pattern, t_lower):
             return True
 
-    # URL-паттерны выпусков (страницы сборок)
+    # URL-паттерны выпусков
     link = (article.link or "").lower()
     issue_url_patterns = [
-        r"/cb-volume/",
-        r"/volume[-_]\d+/",
-        r"/vol[-_]\d+/",
-        r"/issue[-_]\d+/",
-        r"/issues?/\d+",
-        r"/weekly-edition",
-        r"/digest/\d+",
+        r"/cb-volume/", r"/volume[-_]\d+/", r"/vol[-_]\d+/", r"/issue[-_]\d+/",
+        r"/issues?/\d+", r"/weekly-edition", r"/digest/\d+",
     ]
     for pattern in issue_url_patterns:
         if re.search(pattern, link):
             return True
 
-    # Содержимое: короткое описание + много ссылок на статьи этого выпуска
-    # Если summary содержит список других статей — это оглавление
-    if t_lower in ("volume", "том") or re.search(r"^(?:volume|том)\s+\d+", text[:30]) or re.search(r"^(?:том|volume)\s+\d+\s+(?:выпуск|issue)\s+\d+", t_lower):
-        # В summary нет осмысленного текста, только оглавление
-        if len(summary_stripped := (article.summary or "").strip()) < 200:
-            if "in this issue" in text or "в этом выпуске" in text or "table of contents" in text:
-                return True
+    # 4. Мусорные страницы (навигация, корзины, базы данных)
+    JUNK_WORDS = [
+        "корзина", "bookstore", "книжный магазин", "база данных", "database",
+        "values.php", "armtrade", "cart", "login", "sign in", "sign up",
+        "privacy policy", "cookie policy", "terms of use", "404 not found"
+    ]
+    for pattern in JUNK_WORDS:
+        if pattern in t_lower:
+            return True
 
-    # Тесты
-    if re.match(r"^(?:отсечной|контрольный)\s+тест\b", t_stripped.lower()):
+    if re.search(r"\.(com|org|ru|net|info|io|php|gov|edu)\b", t_lower):
         return True
-    if re.match(r"^(?:cutoff|control)\s+test\b", t_stripped.lower()):
+    if re.search(r"[a-z0-9-]+\.\s*(com|org|ru|net|info|io|php|gov|edu)\b", t_lower):
         return True
 
-    # Анонсы с датой+временем
+    # 5. Тесты и анонсы
+    if re.match(r"^(?:отсечной|контрольный)\s+тест\b", t_lower):
+        return True
+    if re.match(r"^(?:cutoff|control)\s+test\b", t_lower):
+        return True
+
     has_time = re.search(r"\d{1,2}:\d{2}\s*(?:[-–—]|до)\s*\d{1,2}:\d{2}", text)
-    has_date = re.search(
-        r"\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}", text, flags=re.IGNORECASE,
-    )
+    has_date = re.search(r"\d{1,2}\s+(?:" + _MONTHS_RU + r")[а-яё]*\s+\d{4}", text, flags=re.IGNORECASE)
     if has_time and has_date:
         return True
 
-    # Серии
-    if re.match(r"^серия\s+[«\"]", t_stripped.lower()):
+    if re.match(r"^серия\s+[«\"]", t_lower):
         return True
-
     if "анонимно (не проверено)" in text or "anonymous (not verified)" in text:
         return True
     if "чатем-хаус и интернет" in text or "chatham house and internet" in text:
         return True
 
-    # Заголовок — только имя автора (2-3 слова, каждое похоже на имя человека)
+    # 6. Только имя автора
     words = t_stripped.split()
     if 2 <= len(words) <= 3 and len(t_stripped) < 45:
-        # Каждое слово с заглавной буквы
-        looks_like_name = all(
-            len(w) >= 2 and w[0].isupper()
-            for w in words if w and w[0].isalpha()
-        )
-        if looks_like_name:
-            has_punct = bool(re.search(r"[.,:;!?\-–—()«»&/]", t_stripped))
+        clean_words = []
+        for w in words:
+            # Заменяем инициалы ("А.", "A.") на "X", чтобы они не считались плохой пунктуацией
+            if re.match(r"^[А-ЯЁA-Z]\.$", w):
+                clean_words.append("X")
+            else:
+                clean_words.append(w)
+
+        is_all_caps = all(w[0].isupper() for w in clean_words if w and w[0].isalpha())
+        
+        if is_all_caps:
+            # Проверяем плохую пунктуацию (в clean_words инициалов уже нет)
+            has_bad_punct = any(re.search(r"[.,:;!?\-–—()«»&/]", w) for w in clean_words)
             has_digit = bool(re.search(r"\d", t_stripped))
-            # Английские и русские служебные слова, исключающие имя
+            # Для проверки стоп-слов заменяем инициалы в тексте на "X", чтобы "а." не срабатывало как "а"
+            check_text = t_stripped.lower()
+            for w in words:
+                if re.match(r"^[А-ЯЁA-Z]\.$", w):
+                    check_text = check_text.replace(w.lower(), "x")
+
             has_stop = bool(re.search(
                 r"\b(?:is|are|was|were|has|have|will|can|about|over|with|from|of|in|on|to|"
                 r"the|a|an|and|or|but|for|by|at|as|no|not|new|how|why|what|when|"
                 r"faces|toward|towards|during|after|before|between|against|under|into|"
                 r"и|в|во|не|что|он|на|я|с|со|как|а|то|все|она|так|его|но|да|ты|к|у|же|вы|за|бы|по|только|ее|мне|было|вот|от|меня|еще|нет|о|из|ему|теперь|когда|даже|ну|вдруг|ли|если|уже|или|ни|быть|был|него|до|вас|нибудь|опять|уж|вам|ведь|там|потом|себя|ничего|ей|может|они|тут|где|есть|надо|ней|для|мы|тебя|их|чем|была|сам|чтоб|без|будто|чего|раз|тоже|себе|под|будет|ж|тогда|кто|этот|того|потому|этого|какой|совсем|ним|здесь|этом|один|почти|мой|тем|чтобы|нее|сейчас|были|куда|зачем|всех|никогда|можно|при|наконец|два|об|другой|хоть|после|над|больше|тот|через|эти|нас|про|всего|них|какая|много|разве|три|эту|моя|впрочем|хорошо|свою|этой|перед|иногда|лучше|чуть|том|нельзя|такой|им|более|всегда|конечно|всю|между)\b",
-                t_stripped.lower()
+                check_text
             ))
-            if not has_punct and not has_digit and not has_stop:
+
+            if not has_bad_punct and not has_digit and not has_stop:
                 return True
 
     return False
-
 
 def article_to_html(article: Article, cache: dict) -> str:
     # Защита: если после очистки ничего не осталось — вернуть пустую строку
