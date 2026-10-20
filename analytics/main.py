@@ -62,7 +62,10 @@ def _clean_summary_before_translation(title: str, summary: str, source: str) -> 
     s = s.strip(" .,:;-–—|")
 
     # 4. Если остался только короткий огрызок (< 30 символов) — считаем пустым
-    if len(s) < 30:
+    # Если остаток короткий (меньше 40), но в нём есть знаки препинания — это может быть реальное описание
+    if len(s) < 40:
+        if any(c in s for c in ".,!?"):
+            return s
         return ""
 
     # 5. Если после чистки всё ещё начинается с заголовка — снова убираем
@@ -73,7 +76,7 @@ def _clean_summary_before_translation(title: str, summary: str, source: str) -> 
             "", s, flags=re.IGNORECASE,
         ).strip(" .,:;-–—|")
 
-    if len(s) < 30:
+    if len(s) < 40 and not any(c in s for c in ".,!?"):
         return ""
 
     return s

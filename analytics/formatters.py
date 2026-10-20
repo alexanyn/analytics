@@ -478,7 +478,8 @@ def is_junk_article(article: Article) -> bool:
     JUNK_WORDS = [
         "корзина", "bookstore", "книжный магазин", "база данных", "database",
         "values.php", "armtrade", "cart", "login", "sign in", "sign up",
-        "privacy policy", "cookie policy", "terms of use", "404 not found"
+        "privacy policy", "cookie policy", "terms of use", "404 not found",
+        "поиск (солр)", "поиск (solr)", "search results", "search (solr)", "страница поиска"
     ]
     for pattern in JUNK_WORDS:
         if pattern in t_lower:
