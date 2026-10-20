@@ -1,12 +1,4 @@
 {
-  "la chine veut elle gagner en iran": {
-    "timestamp": 1791788484.7288725,
-    "category": "GEOPOLITICS",
-    "translated_title": "Хочет ли Китай «победить» в Иране?",
-    "translated_summary": "Медиа-вселенная напоминает «перевернутый мир», описанный уругвайским писателем Эдуардо Галеано.Чем больше Соединенные Штаты попирают международное право, тем больше Китай обвиняют в угрозах.Таким образом, конфликт в Иране, спровоцированный Вашингтоном и Тель-Авивом, но который приведет к (…)\n/ <a href=\"https://www.monde-diplomatique.fr/index/pays/chine\" rel=\"tag\">Китай</a>, <a href=\"https://www.monde-diplomatique.fr/index/pays/iran\" rel=\"tag\">Иран</a>, <a href=\"https://www.monde-diplomatique.fr/index/pays/etatsunis\" rel=\"tag\">США</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/imperialisme\" rel=\"tag\">Империализм</a>, <a href=\"https://www.monde-diplomatique.fr/index/sujet/geopolitique\" rel=\"tag\">Геополитика</a>",
-    "original_title": "La Chine veut-elle « gagner » en Iran ?",
-    "translation_ok": true
-  },
   "water has emerged as a key issue for arizona voters ahead of us midterms": {
     "timestamp": 1791874885.328704,
     "category": "ECONOMICS",
@@ -503,14 +495,6 @@
     "original_title": "Find Someone at RSIS - S. Rajaratnam School of International Studies (RSIS)",
     "translation_ok": true
   },
-  "реликтовое излучение франции учиться у просветителей настоящим образом": {
-    "timestamp": 1792393268.2500114,
-    "category": "GEOPOLITICS",
-    "translated_title": "Реликтовое излучение Франции: учиться у просветителей настоящим образом - Клуб «Валдай»",
-    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMihAFBVV95cUxNdFJYQUhXMWlVTjJQLXNka3ZQbHdmWlpIQ2RUZlNmXzM0YWZGMTVXeU42UHMxMGNFMXRDSnI0RnoybHY0ME1McG9EZFhVd2FUQU9pNkhLMHdxdld4dEl5LWJHdl8xRUJ2Ti1iN21BTTFYOUQtc1NKVTRoZ1ZGcGVvNFZVWWY?oc=5\" target=\"_blank\">Реликтовое излучение Франции: учиться у просветителей настоящим образом</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Клуб «Валдай»</font>",
-    "original_title": "Реликтовое излучение Франции: учиться у просветителей настоящим образом - Клуб «Валдай»",
-    "translation_ok": false
-  },
   "cart": {
     "timestamp": 1792393270.6610193,
     "category": "GEOPOLITICS",
@@ -573,6 +557,206 @@
     "translated_title": "Ян Берн",
     "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiT0FVX3lxTFA5VW1CaGNSNi16T0FXcmowcVM5VWxfVkp2Zk50QWctbEtjUlEtVDhFSzRqU3U4NkJ2WFB6Qm5URmVPQldpN2FiWTNQa2k4Q1U?oc=5\" target=\"_blank\">Ian Burn</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CEPR</font>",
     "original_title": "Ian Burn - CEPR",
+    "translation_ok": true
+  },
+  "the fog of tech": {
+    "timestamp": 1792479667.12935,
+    "category": "TECHNOLOGY",
+    "translated_title": "Туман технологий",
+    "translated_summary": "Будущее войны не может уйти от прошлого",
+    "original_title": "The Fog of Tech",
+    "translation_ok": true
+  },
+  "the limits of american power": {
+    "timestamp": 1792479667.1811986,
+    "category": "TECHNOLOGY",
+    "translated_title": "Пределы американской мощи",
+    "translated_summary": "Уильям Макрейвен, четырехзвездный адмирал в отставке и крупная фигура в американском военном деле, использует историю и свой личный опыт, чтобы убедительно доказать, что американские лидеры часто переоценивают потенциал военной силы для достижения политических целей и что новые технологии, такие как искусственный интеллект, усугубят эту проблему.",
+    "original_title": "The Limits of American Power",
+    "translation_ok": true
+  },
+  "empires of ai": {
+    "timestamp": 1792479667.4211829,
+    "category": "TECHNOLOGY",
+    "translated_title": "Империи ИИ",
+    "translated_summary": "В этом эссе Найл Фергюсон, один из ведущих мировых экспертов по имперской истории, объединяет бывшего генерального директора Google Эрика Шмидта и исследователя Лизу Клаасен, чтобы выдвинуть провокационный аргумент о том, что ИИ по своей сути является «имперской технологией», и раскрыть, что судьба прошлых империй может сказать о будущем США.",
+    "original_title": "Empires of AI",
+    "translation_ok": true
+  },
+  "do you trust apple": {
+    "timestamp": 1792479669.055359,
+    "category": "TECHNOLOGY",
+    "translated_title": "Вы доверяете Apple?",
+    "translated_summary": "Apple пользуется большим доверием в плане предоставления интегрированных продуктов и сохранения конфиденциальности;настоящий вопрос доверия заключается в том, считаете ли вы, что Siri AI оправдает вложение большего количества средств в их экосистему",
+    "original_title": "Do You Trust Apple?",
+    "translation_ok": true
+  },
+  "the china price": {
+    "timestamp": 1792479669.4570544,
+    "category": "GEOPOLITICS",
+    "translated_title": "Китайская цена",
+    "translated_summary": "В 1971 году, когда международная валютная система была на грани краха, министр финансов США Джон Конналли заявил группе обеспокоенных европейских министров финансов, что доллар — это «наша валюта, но ваша проблема».Доллар стал официальной резервной валютой этой системы в 1944 году в соответствии с Бреттон-Вудским соглашением, что сделало его подписантов зависимыми от прихотей денежно-кредитной политики США.Даже после того, как Бреттон-Вудс рухнул и многие валюты стали свободно плавать, доллар продолжал доминировать.За последние полвека валютная мощь США только возросла, поскольку все больше стран интегрировались в мировую экономику и, следовательно, стали зависеть от доллара.Китай, зависящий от экономического роста, ориентированного на экспорт, занимает первое место среди них.",
+    "original_title": "The China Price",
+    "translation_ok": true
+  },
+  "реликтовое излучение франции учиться у просветителей настоящим образом": {
+    "timestamp": 1792479670.6173713,
+    "category": "GEOPOLITICS",
+    "translated_title": "Реликтовое излучение Франции: учиться у просветителей настоящим образом",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMihAFBVV95cUxNdFJYQUhXMWlVTjJQLXNka3ZQbHdmWlpIQ2RUZlNmXzM0YWZGMTVXeU42UHMxMGNFMXRDSnI0RnoybHY0ME1McG9EZFhVd2FUQU9pNkhLMHdxdld4dEl5LWJHdl8xRUJ2Ti1iN21BTTFYOUQtc1NKVTRoZ1ZGcGVvNFZVWWY?oc=5\" target=\"_blank\">Реликтовое излучение Франции: учиться у просветителей настоящим образом</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Клуб «Валдай»</font>",
+    "original_title": "Реликтовое излучение Франции: учиться у просветителей настоящим образом - Клуб «Валдай»",
+    "translation_ok": false
+  },
+  "space superiority and the military tools to secure it": {
+    "timestamp": 1792479670.9822888,
+    "category": "GEOPOLITICS",
+    "translated_title": "Космическое превосходство и военные инструменты для его обеспечения",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiggFBVV95cUxPWkdybmpwTW45bWVPYTM3WXV0Zl9vV095VjR0eXJ3dFJjeHdYRkJXMFJIZnh2TzJaWUppT3VfeDl2NXowTHMxSnlDTU9LQXM5Z1pGbU1wcG1mSHhHVXplRDBwaVFvLVJtUEkza00tQ3FaYzdjd2tFV2dtUlpfZ0pYYVV3?oc=5\" target=\"_blank\">Space Superiority and the Military Tools to Secure It</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">",
+    "original_title": "Space Superiority and the Military Tools to Secure It - CSIS | Center for Strategic and International Studies",
+    "translation_ok": true
+  },
+  "a better america first": {
+    "timestamp": 1792479671.058575,
+    "category": "GEOPOLITICS",
+    "translated_title": "Лучшее «Америка прежде всего»",
+    "translated_summary": "Чарльз Купчан, работавший в администрациях Клинтона и Обамы, утверждает, что многие аспекты внешней политики Трампа стоит сохранить и привести в соответствие с изменениями в международной системе.Он объясняет, как следующий президент может объединить хорошие импульсы лозунга «Америка прежде всего» с лучшими идеями либерального интернационализма.",
+    "original_title": "A Better “America First”",
+    "translation_ok": true
+  },
+  "ai is a choice": {
+    "timestamp": 1792479671.4457686,
+    "category": "TECHNOLOGY",
+    "translated_title": "ИИ - это выбор.",
+    "translated_summary": "Алекс Имас, Мохамед Эль-Эриан и Джеймс Маньика, ведущие голоса на стыке бизнеса и технологий, утверждают, что для реализации потенциала ИИ необходимо предоставить работникам, сообществам, лабораториям ИИ, разработчикам инфраструктуры и крупным компаниям долю прибыли.Используя идеи теории игр, они утверждают, что расширение сотрудничества может заставить ИИ работать на всех.",
+    "original_title": "AI Is a Choice",
+    "translation_ok": true
+  },
+  "earth satellites and foreign policy": {
+    "timestamp": 1792479671.509226,
+    "category": "GEOPOLITICS",
+    "translated_title": "«Спутники Земли и внешняя политика»",
+    "translated_summary": "Появление новой технологии неизменно сопровождается стратегическими последствиями, поднимающими вопрос о том, кто выиграет и можно ли управлять рисками.В 1957 году, после запуска советского спутника, американские политики и аналитики признали, что спутник, как заметил на этих страницах американский физик и инженер Ллойд Беркнер, принесет преобразующий эффект.Соединенные Штаты не могут рисковать проиграть, утверждал Беркнер, но правительства также не должны допускать, чтобы геополитическая напряженность мешала появлению широких преимуществ этой технологии.",
+    "original_title": "“Earth Satellites and Foreign Policy”",
+    "translation_ok": true
+  },
+  "taming original sin redux the role of benchmark driven flows": {
+    "timestamp": 1792479674.016258,
+    "category": "ECONOMICS",
+    "translated_title": "Укрощение первородного греха: роль потоков, управляемых тестами",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMijAFBVV95cUxPUGM5VkJubGY2am4zdGVINC1JNFp0SG9NTVlWMWhGbHV0MXRTeWllVm41U3hCSHd0TzVkcUNCQzJxMTJPcmJFMm9JVGVaZm5kTmpER0hnZWgydk5QcFlYNnNEQUJWY2JqZnlkUTAyMXNEcUZsNmQwR3ZWYzU4R3RVdlZUemkzcTAzbUFTRg?oc=5\" target=\"_blank\">Taming original sin redux: The role of benchmark-driven flows</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CEPR</font>",
+    "original_title": "Taming original sin redux: The role of benchmark-driven flows - CEPR",
+    "translation_ok": true
+  },
+  "hungary s path to the euro five tests for a sustainable adoption strategy": {
+    "timestamp": 1792479674.0886192,
+    "category": "ECONOMICS",
+    "translated_title": "Путь Венгрии к евро: пять тестов для стратегии устойчивого внедрения",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMinAFBVV95cUxPMHRQRUg5UzJIbjRDN2tLRzQwVVp2U1A3VkVkWnp6QzJXQjN3S19KZ1RRYXdZUXZQeXREV0EzbHZjbC1HNmRITjhCdzluTms3WlVkUDRmVGZXZC16UGVHVjNZT1hIOWdMa215d3hBR0k4WDZOeE5seEhqQ3NOck5LSVlMRkYzVHB5MXcyNExkdzE1ZkRMTF9IVG5rMEU?oc=5\" target=\"_blank\">Hungary’s path to the euro: five tests for a sustainable adoption strategy</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Bruegel</font>",
+    "original_title": "Hungary’s path to the euro: five tests for a sustainable adoption strategy - Bruegel",
+    "translation_ok": true
+  },
+  "search solr": {
+    "timestamp": 1792479674.6386466,
+    "category": "ECONOMICS",
+    "translated_title": "Поиск (СОЛР)",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiaEFVX3lxTE1ZOEpXclFqRHVSeFA0QWRYWDRGTjRBWU1FSml0OVZoTzJWTDZTdFBFUnduOUVIV2U5c0dlQS1heVpyRWo1MDQzaHdNcmthUkdxVHp3c0ItcEtjSGxON3JXanBxaGZMay1P?oc=5\" target=\"_blank\">Search (SOLR)</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">CEPR</font>",
+    "original_title": "Search (SOLR) - CEPR",
+    "translation_ok": true
+  },
+  "legacy of armenia s assets for debt hinders economic decoupling from russia part two": {
+    "timestamp": 1792479675.4238858,
+    "category": "ECONOMICS",
+    "translated_title": "Наследие Армении по принципу «активы в обмен на долг» препятствует экономическому отделению от России (Часть вторая)",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMiqgFBVV95cUxQWU1VNWxweDNlWnhraG5xY2tCMkN3SG9XbUV3MERlbmdsTlBBVkU4UFBKZmtpZ1FYeXB0SThtVWxGb0xDZ0NScnUwNFRxTzFQWE8wNklFMXVfQ3FmSVNMOU9NNEhJOGc5anRsQlZncFhDVDdwOEVtVXJlTWI3Y3BRMlNtSGhKTnV1UWJielNZaUpJVzlseC1meldmOG1fdlZLWjl2dVF6VDQtdw?oc=5\" target=\"_blank\">Legacy of Armenia’s ‘Assets-for-Debt’ Hinders Economic Decoupling from Russia (Part Two)</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The Jamestown Foundation</font>",
+    "original_title": "Legacy of Armenia’s ‘Assets-for-Debt’ Hinders Economic Decoupling from Russia (Part Two) - The Jamestown Foundation",
+    "translation_ok": true
+  },
+  "ps events reinventing europe": {
+    "timestamp": 1792479675.5469997,
+    "category": "ECONOMICS",
+    "translated_title": "PS Events: Новое открытие Европы",
+    "translated_summary": "<p>Несмотря на то, что Европа может похвастаться ведущими мировыми университетами и исследовательскими институтами, надежными торговыми отношениями, мощной промышленной базой и устоявшимся верховенством закона, Европа не смогла использовать свои преимущества таким образом, чтобы полностью раскрыть свой экономический потенциал.В то же время, похоже, что на международном уровне она не достигает своего веса, вместо того, чтобы обеспечить лидерство, в котором мир так отчаянно нуждается для поддержания прогресса на пути к широко разделяемым целям.\n<br /></р>",
+    "original_title": "PS Events: Reinventing Europe",
+    "translation_ok": true
+  },
+  "we were looking at it wrong the explosive claim that s upended the ai world": {
+    "timestamp": 1792479676.7275412,
+    "category": "BUSINESS",
+    "translated_title": "«Мы неправильно на это смотрели»: взрывное заявление, которое перевернуло мир искусственного интеллекта",
+    "translated_summary": "«Думаю, у меня есть хорошие новости о природе нейронных сетей».Этими простыми словами оптимизма Ник Каммарата, исследователь из AI-стартапа Goodfire, опубликовал сообщение в блоге объемом 26 000 слов, которое перевернуло мир искусственного интеллекта с ног на голову, вызвав дикие спекуляции, а также осторожное (и не очень осторожное) празднование.Претензия Каммараты&#8230",
+    "original_title": "“We were looking at it wrong”: The explosive claim that’s upended the AI world",
+    "translation_ok": true
+  },
+  "bloombergnef s transition metals outlook 2026 global metal supply shortages set to ease but copper faces a 332 billion investment gap": {
+    "timestamp": 1792479677.5476844,
+    "category": "BUSINESS",
+    "translated_title": "Прогноз BloombergNEF по переходным металлам на 2026 год: глобальный дефицит поставок металлов уменьшится, но медь столкнется с инвестиционным дефицитом в 332 миллиарда долларов",
+    "translated_summary": "В «Прогнозе переходных металлов на 2026 год» (BNEF) отмечается, что девять из 10 изученных материалов находятся на пути к обеспечению достаточных мощностей поставок до 2050 года, что является значительным улучшением по сравнению с предыдущими прогнозами.",
+    "original_title": "BloombergNEF’s Transition Metals Outlook 2026: Global Metal Supply Shortages Set to Ease, but Copper Faces a $332 Billion Investment Gap",
+    "translation_ok": true
+  },
+  "the pentagon doesn t need to reinvent supply chain transparency": {
+    "timestamp": 1792479678.761752,
+    "category": "SECURITY",
+    "translated_title": "Пентагону не нужно заново изобретать прозрачность цепочки поставок",
+    "translated_summary": "<p>Пока Соединенные Штаты стремятся восстановить свою оборонно-промышленную базу, Вашингтон изо всех сил пытается понять промышленную экосистему, которую он больше не контролирует и в значительной степени не понимает.Китаю удалось добиться стратегического преимущества перед Соединенными Штатами за счет целенаправленного применения экспортного контроля и лицензионных требований к конкретным материалам в конкретных узлах цепочки поставок.Реакция США, напротив, в целом была шире по масштабу и неглубокой по своему эффекту.Это похоже на то, как если бы Китай нанес удар по цепочке поставок высокоточными боеприпасами, в то время как Соединенные Штаты все еще используют неуправляемые бомбы. Сохраняя запасы оружия и устойчивые силы, давайте</p>\n<p>Пост <a href=\"https://warontherocks.com/cogs-of-war/the-pentagon-doesnt-need-to-reinvent-supply-chain-transparency/\">Пентагону не нужно заново изобретать прозрачность цепочки поставок</a> впервые появился на сайте <a href=\"https://warontherocks.com\">War on theСкалы</a>.</p>",
+    "original_title": "The Pentagon Doesn’t Need to Reinvent Supply Chain Transparency",
+    "translation_ok": true
+  },
+  "in skepticism we trust ukraine reacts to the diesel deal": {
+    "timestamp": 1792479679.568566,
+    "category": "SECURITY",
+    "translated_title": "Мы верим в скептицизм: реакция Украины на дизельную сделку",
+    "translated_summary": "<p>Добро пожаловать в The Ukraine Compass, еженедельный дайджест украинских комментариев и анализа со всего политического спектра, предназначенный только для участников War on the Rocks.Каждую неделю мы представляем вам тщательно подобранную подборку статей из украинских СМИ, предлагающих понимание того, как сами украинцы обсуждают проблемы, формирующие их страну.эти произведения расширяют его, раскрывая структуру повседневной жизни, политики и общественных споров в стране, находящейся в состоянии войны.Собранные здесь точки зрения разнообразны, откровенны и часто удивительны, вместе образуя более полную картину Украины такой, какая она есть на самом деле. Frontline</p>\n<p>Пост <a href=\"https://warontherocks.com/in-skepticism-we-trust-ukraine-reacts-to-the-diesel-deal/\">Мы верим в скептицизм: реакция Украины на дизельную сделку</a> впервые появился на сайте <a href=\"https://warontherocks.com\">War on the Rocks</a>.</p>",
+    "original_title": "In Skepticism We Trust: Ukraine Reacts to the Diesel Deal",
+    "translation_ok": true
+  },
+  "march separately strike combined rethinking mass and maneuver on the transparent battlefield": {
+    "timestamp": 1792479679.7497113,
+    "category": "SECURITY",
+    "translated_title": "Марш отдельно, удар вместе: переосмысление массы и маневра на прозрачном поле боя",
+    "translated_summary": "<p>Между 10 и 13 мая 1940 года немецкая танковая группа Клейста продвигалась через густой лес Арденнский лес, который французы считали непроходимым для крупных механизированных соединений.Насчитывая пять танковых и три мотопехотные дивизии, общая численность которых составляла около 41 000 машин, вся танковая группа двигалась всего лишь по четырем роллбаненам, или направлениям наступления, создавая крупнейшую пробку в военной истории. Когда передовой XIX бронетанковый корпус под командованием генерала Хайнца Гудериана подошёл к французскому городу Седан, он олицетворял концепцию Schwerpunkt, или точки главных усилий.Следуя своему принципу «Klotzen, nicht kleckern»;(ударить кулаком, не чувствовать</p>\n<p>Пост <a href=\"https://warontherocks.com/march-separately-strike-combined-rethinking-mass-and-maneuver-on-the-transparent-battlefield/\">Март отдельно, комбинированный удар: переосмысление массовости и маневра на прозрачном поле боя</a> впервые появился на сайте <a href=\"https://warontherocks.com\">War on theСкалы</a>.</p>",
+    "original_title": "March Separately, Strike Combined: Rethinking Mass and Maneuver on the Transparent Battlefield",
+    "translation_ok": true
+  },
+  "south korea broadens multifaceted ties with central asia": {
+    "timestamp": 1792479680.7347035,
+    "category": "SECURITY",
+    "translated_title": "Южная Корея расширяет многогранные связи с Центральной Азией",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMihgFBVV95cUxQZ0NmZlJRUmQ4NEZwQjVFRFhLYnpRT2paaU9KZVRKM3Y2azlSWGxFb09WdWZQOVhnOG4xaEcwZFRhbTBaRkdPZTJma2o2VFB5TVdrZVh2cEgzRHhHSjJ1ck9POFd3QVlzaDJJdDBLUjhfam16WVM3eFJ2dFRNQV8wdkxRTHVzQQ?oc=5\" target=\"_blank\">South Korea Broadens Multifaceted Ties with Central Asia</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The Jamestown Foundation</font>",
+    "original_title": "South Korea Broadens Multifaceted Ties with Central Asia - The Jamestown Foundation",
+    "translation_ok": true
+  },
+  "countering drone proliferation from russia s war against ukraine implications for arms control and security governance": {
+    "timestamp": 1792479681.1337395,
+    "category": "SECURITY",
+    "translated_title": "Противодействие распространению дронов в результате войны России против Украины: последствия для контроля над вооружениями и управления безопасностью",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMijgJBVV95cUxPczRmaEdXMmpRbGFwc2tTSTFPemxGRUs0SHdQX3hwSE1lLXhYeExqc3hiU3d4aGFpekpEaWhMSEVyT1o4MEhObGcyd21FNkc0QVdfLUNVYWFPbDh4SzRIeHJLR3FtZTJpZHlQVmF3Z2RlT1dVSWRmblhtNzZGX3JLQUhvMzc2b0hwa3hGTjZ1dmdzTEQ0ODlzT1k0VXB3TkhoRzhpa1FTdTk4czJUWFVhLXhHVTRtX012UTU5dDBPZUh1V0s4NW5ick51VmMwUTlBSDVaWkN3eEVFTmp4SzhLOTRJTDRqa0JCZWt3WEFTbWEwQmhoSVpNVjVwQTFZbENzTFc2VXpzUmFHQlJlWlE?oc=5\" target=\"_blank\">Countering Drone Proliferation from Russia’s War Against Ukraine: Implications for Arms Control and Security Governance</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">Stockholm International Peace Research Institute</font>",
+    "original_title": "Countering Drone Proliferation from Russia’s War Against Ukraine: Implications for Arms Control and Security Governance - Stockholm International Peace Research Institute",
+    "translation_ok": true
+  },
+  "russian diesel deal and energy ceasefire expose moscow s limits": {
+    "timestamp": 1792479682.296141,
+    "category": "ENERGY",
+    "translated_title": "Сделка с Россией по дизельному топливу и прекращение огня в энергетике раскрывают пределы возможностей Москвы",
+    "translated_summary": "[EN] <a href=\"https://news.google.com/rss/articles/CBMijgFBVV95cUxQLXBiTDdkM2NXM1BlOU1IV1I0eFQ5NURQc0RiU3dZdjlXR28wRE52MFBZN21JYy1MeDlYWVVEVGRsYW1nZmpwTEVQZGpFNVJaZ09yeHFyMFRWVkhramJkaGNfcDRFenlvS0NlM0RsaWgtZjdXSlBWQXRTNFR0Ul9hRUU2TEtPanNiem1WMTVB?oc=5\" target=\"_blank\">Russian Diesel Deal and Energy Ceasefire Expose Moscow’s Limits</a>&nbsp;&nbsp;<font color=\"#6f6f6f\">The Jamestown Foundation</font>",
+    "original_title": "Russian Diesel Deal and Energy Ceasefire Expose Moscow’s Limits - The Jamestown Foundation",
+    "translation_ok": true
+  },
+  "south korea us pull apart as the alliance strains": {
+    "timestamp": 1792479687.4138803,
+    "category": "BUSINESS",
+    "translated_title": "Южная Корея, США разрываются, поскольку Альянс напрягается.",
+    "translated_summary": "Ограниченный обмен разведданными, инвестиционный скандал и замечания американского командующего указывают на растущий разрыв между союзниками.",
+    "original_title": "South Korea, US Pull Apart as the Alliance Strains",
+    "translation_ok": true
+  },
+  "how the fossil fuel industry captured australia and maintains its political dominance": {
+    "timestamp": 1792479688.0755346,
+    "category": "ENERGY",
+    "translated_title": "Как индустрия ископаемого топлива «захватила» Австралию и сохраняет свое политическое доминирование.",
+    "translated_summary": "Считая уголь и газ необходимыми для создания рабочих мест, процветания и национальной идентичности, отрасль продолжает сопротивляться переходу на возобновляемые источники энергии.",
+    "original_title": "How the Fossil Fuel Industry ‘Captured’ Australia and Maintains Its Political Dominance",
     "translation_ok": true
   }
 }
