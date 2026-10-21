@@ -1,3 +1,4 @@
+import os
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -38,27 +39,55 @@ def looks_translated(original: str, translated: str) -> bool:
 
 
 def _fetch_via_jina(url: str) -> str:
-    """Jina Reader — бесплатный API для извлечения текста из любой страницы.
-    Обходит Cloudflare, Google News редиректы и пейволлы (иногда)."""
+    """Jina Reader — API для извлечения текста. Использует ключ из окружения."""
     import requests
+    import logging
+    
+    jina_key = os.environ.get("JINA_API_KEY")
+    if not jina_key:
+        logging.getLogger("analytics_digest").debug("JINA_API_KEY не найден, пропускаю Jina")
+        return ""
+
+    headers = {
+        "Authorization": f"Bearer {jina_key}",
+        "Accept": "text/plain",
+        "X-With-Generated-Alt": "true"
+    }
+    
     try:
-        # Jina Reader ожидает URL в конце пути
         jina_url = f"https://r.jina.ai/{url}"
-        resp = requests.get(jina_url, timeout=15)
+        resp = requests.get(jina_url, headers=headers, timeout=25)
+        
+        if resp.status_code == 401:
+            logging.getLogger("analytics_digest").warning("Jina API ключ недействителен")
+            return ""
+        if resp.status_code == 429:
+            logging.getLogger("analytics_digest").warning("Jina rate limit (429)")
+            return ""
         if resp.status_code != 200:
             return ""
 
         text = resp.text
+        # Jina сообщает об ошибках в заголовке
+        if "Title: Not Found" in text or "Target URL returned error 404" in text or "Target URL returned error 403" in text:
+            return ""
+
+        # Если это markdown с заголовком "Markdown Content:"
         if "Markdown Content:" in text:
-            # Отрезаем мета-данные Jina (Title, URL Source, Published Time)
             content = text.split("Markdown Content:")[-1].strip()
-            # Ищем первый содержательный абзац
-            for p in content.split("\n\n"):
-                p = p.strip()
-                if len(p) > 50 and not p.startswith(("!", "[", "##", "**", "|")):
-                    return p[:1000]
+        else:
+            content = text.strip()
+
+        # Ищем первый содержательный абзац
+        for p in content.split("\n\n"):
+            p = p.strip()
+            # Игнорируем картинки, ссылки, заголовки
+            if (len(p) > 80 
+                and not p.startswith(("!", "[", "##", "**", "|", "*", "http"))
+                and not is_generic_description(p)
+                and "](" not in p):
+                return p[:900]
     except Exception as e:
-        import logging
         logging.getLogger("analytics_digest").debug(f"Jina failed: {e}")
     return ""
 
@@ -93,6 +122,14 @@ def is_generic_description(text: str) -> bool:
 
     # Текст начинается с "Используя" или "By using" (cookie-соглашения)
     if t.startswith(("используя", "by using", "продолжая использовать")):
+        return True
+
+    # Контакты, ошибки сервера, сообщения о закрытии сайта
+    if "webmaster@" in t or "contact us" in t or "свяжитесь с нами" in t:
+        return True
+    if "has taken down its website" in t or "critical vulnerabilities" in t:
+        return True
+    if "if you have any questions or concerns regarding this website" in t:
         return True
     if "i\n©" in t or "©" in t[:50]: # Часто в начале футера
         return True
