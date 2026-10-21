@@ -509,7 +509,10 @@ def is_junk_article(article: Article) -> bool:
         return True
 
     # 6. Только имя автора
-    words = t_stripped.split()
+    # Сначала убираем суффикс источника, чтобы "Сюзанна Виссерс - CEPR" превратилось в "Сюзанна Виссерс"
+    from .formatters import strip_source_suffix_from_title
+    t_for_name = strip_source_suffix_from_title(t_stripped, "")
+    words = t_for_name.split()
     if 2 <= len(words) <= 3 and len(t_stripped) < 45:
         clean_words = []
         for w in words:
@@ -545,6 +548,9 @@ def is_junk_article(article: Article) -> bool:
     return False
 
 def article_to_html(article: Article, cache: dict) -> str:
+    # Защита: если после очистки ничего не осталось — возвращаем пустоту
+    if not article.title or not re.search(r'[a-zA-Zа-яА-Я0-9]', article.title):
+        return ""
     # Защита: если после очистки ничего не осталось — вернуть пустую строку
     _sanity_title = (article.title or "").strip()
     if not _sanity_title:

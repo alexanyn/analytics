@@ -1,3 +1,4 @@
+import re
 # analytics/senders.py
 import time
 import requests
