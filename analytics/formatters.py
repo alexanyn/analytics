@@ -87,6 +87,8 @@ _EXTRA_TITLE_SUFFIXES = [
     "O'Dwyer's",
     "Stockholm International Peace Research Institute",
     "Клуб «Валдай»",
+    "МЭА",
+    "IEA",
     "Valdai Club",
     "SIPRI",
     "The Jamestown Foundation",
@@ -238,6 +240,7 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"Carbon\s*Кратко", "Carbon Brief", text)
     text = re.sub(r"CarbonКратко", "Carbon Brief", text)
     text = text.replace("пожарной безопасности", "огневой поддержки")
+    text = text.replace("Чик-фил-А", "Chick-fil-A")
 
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
@@ -476,6 +479,7 @@ def is_junk_article(article: Article) -> bool:
 
     # 4. Мусорные страницы (навигация, корзины, базы данных)
     JUNK_WORDS = [
+        "представлено", "presented by", "sponsored by", "sponsored content",
         "корзина", "bookstore", "книжный магазин", "база данных", "database",
         "values.php", "armtrade", "cart", "login", "sign in", "sign up",
         "privacy policy", "cookie policy", "terms of use", "404 not found",

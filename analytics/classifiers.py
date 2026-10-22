@@ -36,6 +36,11 @@ def classify_articles(articles: List[Article]) -> Dict[str, List[Article]]:
         max_matches = 0
         for category, patterns in CATEGORY_PATTERNS.items():
             matches = sum(1 for p in patterns if p.search(text))
+            
+            # Приоритет экономике, если есть явные макро-термины
+            if category == "ECONOMICS" and re.search(r"инфляц|ставк|ввп|рецесси|дефицит|долг", text):
+                matches += 2
+
             if matches > max_matches:
                 max_matches = matches
                 best_category = category
