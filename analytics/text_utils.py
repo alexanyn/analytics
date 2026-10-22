@@ -83,9 +83,10 @@ def _fetch_via_jina(url: str) -> str:
             p = p.strip()
             # Игнорируем картинки, ссылки, заголовки
             if (len(p) > 80 
-                and not p.startswith(("!", "[", "##", "**", "|", "*", "http"))
+                and not p.startswith(("!", "[", "##", "**", "|", "*", "http", "-", "1.", "2."))
                 and not is_generic_description(p)
-                and "](" not in p):
+                and "](" not in p
+                and not p.lower().startswith(("our ", "join ", "donate ", "subscribe "))):
                 return p[:900]
     except Exception as e:
         logging.getLogger("analytics_digest").debug(f"Jina failed: {e}")
@@ -127,6 +128,19 @@ def is_generic_description(text: str) -> bool:
     # Контакты, ошибки сервера, сообщения о закрытии сайта
     if "webmaster@" in t or "contact us" in t or "свяжитесь с нами" in t:
         return True
+
+    # Призывы к действию (донаты, подписки, баннеры, рассылки)
+    cta_markers = [
+        "donate today", "support us", "join our", "secure our future",
+        "subscribe to our", "sign up for our", "become a member",
+        "пожертвовать", "поддержите нас", "станьте членом", "подпишитесь",
+        "flagship newsletter", "weekly round-up", "weekly roundup",
+        "receive the latest on events", "how to connect with the institute",
+        "sign up to our newsletter", "get our newsletter", "our newsletter"
+    ]
+    for marker in cta_markers:
+        if marker in t:
+            return True
     if "has taken down its website" in t or "critical vulnerabilities" in t:
         return True
     if "if you have any questions or concerns regarding this website" in t:
@@ -140,7 +154,9 @@ def is_generic_description(text: str) -> bool:
         "founded in", "has been the leading forum", "is a leading", 
         "is the leading", "is a global", "is an independent", "is a non-profit", 
         "is a nonprofit", "welcome to", "this is the homepage",
-        "try searching our site"
+        "try searching our site",
+        "is a world-leading", "policy institute with a mission", "our mission is",
+        "is a research institute", "is a think tank", "is a think-tank"
     ]
     for marker in generic_markers:
         if marker in t:
@@ -196,21 +212,4 @@ def fetch_description_from_html(url: str) -> str:
         pass
 
     # 2. Fallback — Jina Reader (обходит Cloudflare и JS-рендеринг)
-    try:
-        jina_url = f"https://r.jina.ai/{url}"
-        resp = requests.get(jina_url, timeout=20)
-        if resp.status_code == 200:
-            text = resp.text
-            if "Markdown Content:" in text:
-                content = text.split("Markdown Content:")[-1].strip()
-                for p in content.split("\n\n"):
-                    p = p.strip()
-                    if (len(p) > 80 
-                        and not p.startswith(("!", "[", "##", "**", "|", "*", "http"))
-                        and "http" not in p[:50]
-                        and not is_generic_description(p)):
-                        return p[:900]
-    except Exception:
-        pass
-
-    return ""
+    return _fetch_via_jina(url)
