@@ -95,7 +95,17 @@ def resolve_article(a: dict) -> dict:
             if j_title and tu.is_non_article(a["url"], j_title, split_site=True): a["drop"] = "не статья (Jina)"; return a
             text = tu.post_process_text(j_text)
             if tu.is_generic_description(text) or tu.is_weak_description(text, a.get("source", "")): text = ""
-            if text: a["origin"] = "jina"
+            
+            # Если Jina не смогла достать текст (Cloudflare), используем Playwright
+            if not text:
+                log.info(f"Jina failed. Trying Playwright for: {a['url'][:50]}...")
+                pw_text = tu.fetch_via_playwright(a["url"])
+                text = tu.post_process_text(pw_text)
+                if tu.is_generic_description(text) or tu.is_weak_description(text, a.get("source", "")): text = ""
+                if text: a["origin"] = "playwright"
+
+            if text and a["origin"] == "title":
+                a["origin"] = "jina"
         a["source_text"] = text
     except Exception: pass
     return a

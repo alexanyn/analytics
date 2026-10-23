@@ -170,6 +170,38 @@ def fetch_via_jina(url: str, timeout: int = 40) -> tuple:
         except Exception: pass
     return "", ""
 
+
+def fetch_via_playwright(url: str, timeout: int = 20) -> str:
+    """Использует Playwright для обхода Cloudflare и извлечения текста."""
+    try:
+        from playwright.sync_api import sync_playwright
+        from bs4 import BeautifulSoup
+        import re
+
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.set_extra_http_headers({"User-Agent": UA})
+            page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000)
+            time.sleep(2) # Ждем, пока отработает JS/Cloudflare
+            html = page.content()
+            browser.close()
+
+            soup = BeautifulSoup(html, "html.parser")
+            for tag in soup(["script", "style", "nav", "footer", "header"]):
+                tag.decompose()
+
+            article = soup.find("article") or soup.find("main") or soup.body
+            if article:
+                paragraphs = [p.get_text().strip() for p in article.find_all("p")]
+                good = [p for p in paragraphs if len(p) > 60 and not p.startswith(("#", "|", "*", "-", "["))]
+                text = " ".join(good) if good else " ".join(paragraphs)
+                return _WS_RE.sub(" ", text).strip()[:3000]
+    except Exception as e:
+        log.debug(f"Playwright failed for {url}: {e}")
+    return ""
+
+
 def _entry_dt(e):
     t = e.get("published_parsed") or e.get("updated_parsed")
     if not t: return None
