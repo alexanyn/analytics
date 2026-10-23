@@ -113,27 +113,16 @@ _DOMAIN_TLD = r"(?:com|org|net|ru|io|edu|gov|uk|de|fr|pl|cn|jp|info|eu|co)"
 def clean_html(text: str) -> str:
     if not text:
         return ""
-    try:
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(text, "html.parser")
-        for tag in soup(["script", "style", "img", "figure", "iframe"]):
-            tag.decompose()
-        text = soup.get_text()
-    except Exception:
-        text = re.sub(r"<[^>]+>", "", text)
-    text = re.sub(r"<[^>]*>?", "", text)
-    text = re.sub(r'target\s*=\s*"_blank"', "", text)
-    text = re.sub(r'href\s*=\s*"[^"]*"', "", text)
+    import re
+    # Удаляем скрипты и стили
+    text = re.sub(r"(?is)<(script|style).*?</\1>", " ", text)
+    # Удаляем ВСЕ html-теги (включая <p>, <a>, <font>)
+    text = re.sub(r"<[^>]+>", " ", text)
+    # Раскодируем entities
+    text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"').replace("&#39;", "'")
+    # Схлопываем пробелы
     text = re.sub(r"\s+", " ", text)
-    replacements = {
-        "&lt;": "<", "&gt;": ">", "&amp;": "&", "&quot;": '"',
-        "&#39;": "'", "&nbsp;": " ", "&#8217;": "'",
-        "&#8220;": '"', "&#8221;": '"', "&#8211;": "–", "&#8212;": "—",
-    }
-    for k, v in replacements.items():
-        text = text.replace(k, v)
     return text.strip()
-
 
 def post_process_text(text: str) -> str:
     if not text:
