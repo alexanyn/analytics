@@ -28,11 +28,14 @@ NAMES = {
 
 _EXTRA_TITLE_SUFFIXES = [
     "Council on Foreign Relations", "Center for Strategic and International Studies",
+    "CSIS | Центр стратегических и международных исследований",
     "CSIS |Центр стратегических и международных исследований", "CSIS",
     "Chatham House", "Клуб «Валдай»", "Valdai Club", "МЭА", "IEA",
+    "МЭА - Международное энергетическое агентство",
+    "IEA - International Energy Agency",
     "Stockholm International Peace Research Institute", "The Diplomat", "Foreign Affairs",
     "European Council on Foreign Relations", "Европейский совет по международным отношениям",
-    "Европейский", "ECFR"
+    "European", "Европейский", "ECFR"
 ]
 
 def clean_html(text: str) -> str:
@@ -48,16 +51,15 @@ def post_process_text(text: str) -> str:
     if not text: return ""
     
     # 1. Убираем мусор
-    text = re.sub(r"Ноябрь \d{4}.*?Чатем[- ]Хаус и онлайн", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"Ноябрь \d{4}.*?GMT.*?Чатем[- ]Хаус и онлайн", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"Аноним\s*\(не подтвержден\).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"Чтобы изменить настройки.*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"Комментарий\s+\w+\.\s*drupal.*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+)?\s*—\s*(экономист|старший|вице|профессор|исследователь).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
 
-    # 2. ЖЁСТКАЯ очистка хвостов WordPress (убираем всё после "впервые")
-    text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)?\s*«.*?»\s*впервые\s+.*$", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*впервые\s+опубликован.*$", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*впервые\s+появил.*$", "", text, flags=re.IGNORECASE)
+    # 2. ЖЁСТКАЯ очистка хвостов
+    text = re.sub(r"\s*Пост\s*«.*?»\s*появился\s*впервые\s*на.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*Пост\s*«.*?»\s*впервые.*$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)\s*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*впервые\s+опубликован.*$", "", text, flags=re.IGNORECASE)
 
     # 3. Пробелы и знаки препинания
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z0-9])", r"\1 ", text)
@@ -154,16 +156,9 @@ def is_junk_article(article: Article) -> bool:
     text = (title + " " + (article.summary or "")).lower()
     t_lower = title.strip().lower()
     
-    # Отсекаем профили авторов CEPR
-    if "cepr.org" in article.link:
-        if "/people/" in article.link or "/columns/" in article.link or "/profile/" in article.link or "/voxeu/columns/" in article.link:
-            return True
-        # Если заголовок — это просто имя (2-3 слова) и нет описания
-        words = title.strip().split()
-        if len(words) <= 3 and not article.summary:
-            return True
-
-    if "/author/" in article.link or "/people/" in article.link or "/profile/" in article.link: return True
+    # Отсекаем профили авторов и страницы поиска
+    if "cepr.org" in article.link and ("/people/" in article.link or "/columns/" in article.link or "/profile/" in article.link): return True
+    if "/author/" in article.link or "/profile/" in article.link: return True
     if "search" in article.link.lower() or "solr" in t_lower or "поиск" in t_lower: return True
 
     JUNK_WORDS = ["корзина", "bookstore", "книжный магазин", "база данных", "database",

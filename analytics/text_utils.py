@@ -4,7 +4,6 @@ import os
 import logging
 import requests
 import urllib3
-from bs4 import BeautifulSoup
 from googlenewsdecoder import gnewsdecoder
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -17,33 +16,24 @@ def normalize_for_dedup(title: str) -> str:
     s = re.sub(r"[^\w\s]", " ", s, flags=re.UNICODE)
     return re.sub(r"\s+", " ", s).strip()
 
-def _cyrillic_ratio(text: str) -> float:
-    if not text: return 0.0
-    cyr = sum(1 for c in text if "а" <= c.lower() <= "я" or c == "ё")
-    return cyr / len(text)
-
-def looks_translated(original: str, translated: str) -> bool:
-    if not translated or not original: return False
-    if translated.strip() == original.strip(): return False
-    return True
-
 def is_generic_description(text: str) -> bool:
-    """Проверяет, является ли текст мусором (куки, Cloudflare, общие фразы)."""
+    """Проверяет, является ли текст мусором (куки, Cloudflare, общие фразы, анонсы)."""
     if not text: return True
     t = text.lower().strip()
     
-    # Куки-баннеры и Cloudflare
     junk_markers = [
-        "некоторые из сервисов", "используют сервисы google", "google fonts, analytics",
+        "изменить настройки", "встроенных визуализаций", "маркетинговых целей",
+        "некоторые из сервисов", "используют сервисы google", "google fonts", 
         "этот веб-сайт использует", "защиты от вредоносных ботов", "проверяет, что вы не бот",
         "just a moment", "enable javascript", "verify you are human", "captcha",
         "we can't find the page", "page not found", "©", "copyright", "все права защищены",
-        "используя сайт", "политике обработки", "согласие", "cookie", "cookie policy"
+        "используя сайт", "политике обработки", "согласие", "cookie",
+        "комментарий thilton", "drupal", "аноним", "не подтвержден", "gmt", "ноябрь 2026",
+        "послушайте выступления", "вебинар", "онлайн"
     ]
     if any(m in t for m in junk_markers): return True
     
-    # Футеры и юридическая информация
-    if t.startswith(("фонд", "развития и поддержки", "сетевое издание", "зарегистрировано")):
+    if t.startswith(("фонд", "развития и поддержки", "сетевое издание", "зарегистрировано", "чтобы изменить")):
         return True
     return False
 
@@ -60,7 +50,7 @@ def fetch_description_from_html(url: str) -> str:
         except Exception as e:
             logger.debug(f"Google News decode failed: {e}")
 
-    headers = {"Authorization": f"Bearer {jina_key}", "Accept": "text/plain", "X-With-Generated-Alt": "true"}
+    headers = {"Authorization": f"Bearer {jina_key}", "Accept": "text/plain"}
     
     try:
         jina_url = f"https://r.jina.ai/{real_url}"
