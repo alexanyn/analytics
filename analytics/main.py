@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import asyncio
-import re
 import time
 import logging
 import sys
@@ -12,11 +11,11 @@ from .config import load_config
 from .collectors import collect_articles
 from .dedup import deduplicate, load_recent_titles, add_to_cache
 from .classifiers import classify_articles
-from .translators import translate_article
+from .translators import translate_article, generate_description_groq, _STATS
 from .senders import send_to_telegram
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
-from .text_utils import normalize_for_dedup, looks_translated, fetch_description_from_html
+from .text_utils import normalize_for_dedup, fetch_description_from_html
 from .formatters import is_junk_article
 
 logger = logging.getLogger("analytics_digest")
@@ -25,44 +24,7 @@ handler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s: %(message)s
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
-# 4 воркера × 2.85 запроса/сек ≈ 11 запросов/сек — но rate limiter удержит в пределах 3/сек
-MAX_TRANSLATE_WORKERS = 5
-
-
-def _clean_summary_before_translation(title: str, summary: str, source: str) -> str:
-    """Очищает summary от дубля заголовка и названия источника."""
-    if not summary:
-        return ""
-
-    s = summary.strip()
-    
-    def norm(x):
-        return " ".join(x.lower().split())
-
-    t_norm = norm(title)
-    s_norm = norm(s)
-    
-    # Если summary совпадает с заголовком или начинается с него — отрезаем
-    if t_norm and (s_norm == t_norm or s_norm.startswith(t_norm)):
-        s = s[len(title):].strip(" .,:;-–—|")
-        s_norm = norm(s)
-        if len(s) < 30:
-            return ""
-
-    # Убираем название источника (в начале или конце)
-    if source:
-        for pattern in [
-            rf"\s*[-–—|:]\s*{re.escape(source)}.*$",
-            rf"\s*{re.escape(source)}\s*[-–—|:].*$",
-            rf"^\s*{re.escape(source)}\s*[-–—|:]?\s*",
-        ]:
-            s = re.sub(pattern, "", s, flags=re.IGNORECASE).strip(" .,:;-–—|")
-
-    if len(s) < 20:
-        return ""
-
-    return s
-
+MAX_WORKERS = 5
 
 def translate_one(article):
     from .formatters import strip_source_suffix_from_title, get_source_name
@@ -92,12 +54,83 @@ def translate_one(article):
     if not t_summary or len(t_summary.strip()) < 15:
         t_summary = generate_description_groq(clean_title)
         if not t_summary:
-            t_summary = "Подробности в источнике." # Абсолютный фолбэк
+            t_summary = "Подробности в источнике."
 
     if not t_title:
         t_title = clean_title
 
     return article, t_title, t_summary, True
+
+
+async def main_async():
+    start_time = time.time()
+    config = load_config()
+    
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        logger.error("Missing Telegram credentials")
+        return
+
+    articles_by_feed = await collect_articles(config.rss_feeds)
+    all_articles = [a for arts in articles_by_feed.values() for a in arts]
+    if not all_articles:
+        log_metrics("empty_no_candidates")
+        return
+
+    if config.max_age_days:
+        now = time.time()
+        all_articles = [a for a in all_articles if a.published_ts is None or (now - a.published_ts) <= config.max_age_days * 86400]
+
+    recent_titles = load_recent_titles()
+    logger.info(f"Cache loaded: {len(recent_titles)} entries")
+    
+    deduped = deduplicate(all_articles, recent_titles)
+    
+    before_junk = len(deduped)
+    deduped = [a for a in deduped if not is_junk_article(a)]
+    if before_junk != len(deduped):
+        logger.info(f"Junk filter: {before_junk} → {len(deduped)}")
+        
+    categorized = classify_articles(deduped)
+    
+    max_per_cat = config.digest.max_items_per_category
+    for cat in list(categorized.keys()):
+        categorized[cat] = categorized[cat][:max_per_cat]
+
+    final_articles = [a for arts in categorized.values() for a in arts]
+    logger.info(f"Final digest: {len(final_articles)} articles")
+
+    to_translate = [a for a in final_articles if normalize_for_dedup(a.title) not in recent_titles]
+
+    if to_translate:
+        logger.info(f"Translating {len(to_translate)} articles with {MAX_WORKERS} workers...")
+        t_start = time.time()
+        with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+            futures = [executor.submit(translate_one, a) for a in to_translate]
+            for future in as_completed(futures):
+                try:
+                    article, t_title, t_summary, ok = future.result()
+                    add_to_cache(recent_titles, article, t_title, t_summary, translation_ok=ok)
+                except Exception as e:
+                    logger.debug(f"Future error: {e}")
+        logger.info(f"Translation done in {time.time() - t_start:.1f}s")
+        logger.info(f"Stats: {_STATS}")
+
+    wait_until_publish_time()
+    success = send_to_telegram(categorized, token, chat_id, cache=recent_titles)
+
+    with open("recent_titles.json", "w", encoding="utf-8") as f:
+        json.dump(recent_titles, f, ensure_ascii=False, indent=2)
+
+    duration = time.time() - start_time
+    if success:
+        log_metrics("success", len(final_articles), len(categorized), duration=duration)
+        logger.info(f"Success: {len(final_articles)} articles in {len(categorized)} categories")
+    else:
+        log_metrics("send_failed", duration=duration)
+        send_alert("send_failed")
+
 
 def main():
     try:
