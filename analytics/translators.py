@@ -1,80 +1,51 @@
-# analytics/translators.py
-import os
-import logging
-import requests
+"""translators.py — генерация русских карточек через Groq."""
+from __future__ import annotations
+import logging, os, re, requests
+from typing import Dict, Any
+try:
+    from . import text_utils as tu
+except ImportError:
+    import text_utils as tu
 
-logger = logging.getLogger("analytics_digest")
-_STATS = {"groq_ok": 0, "deepl_ok": 0, "googletrans_ok": 0, "generated": 0, "fail": 0}
+log = logging.getLogger("analytics")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-def _call_groq(prompt: str) -> str:
-    api_key = os.environ.get("GROQ_API_KEY")
-    if not api_key: return ""
-    
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+def groq_chat(prompt: str, system: str = "Ты редактор аналитического дайджеста.") -> str:
+    key = os.environ.get("GROQ_API_KEY")
+    if not key: return ""
     models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
-    
     for model in models:
         try:
-            payload = {"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.3}
-            resp = requests.post(url, headers=headers, json=payload, timeout=15)
-            if resp.status_code == 200:
-                return resp.json()["choices"][0]["message"]["content"].strip()
-        except Exception:
-            continue
+            r = requests.post(GROQ_URL, headers={"Authorization": f"Bearer {key}"}, json={
+                "model": model,
+                "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+                "temperature": 0.3
+            }, timeout=20)
+            if r.status_code == 200:
+                return r.json()["choices"][0]["message"]["content"].strip()
+        except Exception: pass
     return ""
 
-def generate_description_groq(title: str) -> str:
-    """Если текста нет вообще — просим ИИ написать описание по заголовку."""
-    prompt = f"Напиши краткое описание (1-2 предложения) на русском языке, раскрывающее суть этого заголовка: {title}. Не выдумывай конкретные цифры и имена."
-    res = _call_groq(prompt)
-    if res: _STATS["generated"] += 1
-    return res
-
-def _translate_groq(text: str, is_summary: bool = False) -> str:
-    prompt = "Переведи этот текст на русский язык. Верни ТОЛЬКО перевод:\n\n" + text[:2500]
-    return _call_groq(prompt)
-
-def _translate_deepl(text: str) -> str:
-    api_key = os.environ.get("DEEPL_API_KEY")
-    if not api_key: return ""
-    host = "api-free.deepl.com" if api_key.endswith(":fx") else "api.deepl.com"
+def gemini_generate(prompt: str) -> str:
+    key = os.environ.get("GEMINI_API_KEY")
+    if not key: return ""
     try:
-        resp = requests.post(f"https://{host}/v2/translate", 
-            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
-            json={"text": [text[:5000]], "target_lang": "RU"}, timeout=10)
-        if resp.status_code == 200:
-            return resp.json()["translations"][0]["text"].strip()
+        r = requests.post(f"{GEMINI_URL}?key={key}", json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20)
+        if r.status_code == 200:
+            return r.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
     except Exception: pass
     return ""
 
-def _translate_googletrans(text: str) -> str:
-    try:
-        from googletrans import Translator
-        return Translator().translate(text[:4500], dest="ru").text
-    except Exception: return ""
-
-def translate_article(title: str, summary: str) -> tuple[str, str]:
-    t_cyr = sum(1 for c in title if 'а' <= c.lower() <= 'я' or c == 'ё') / max(len(title), 1) > 0.3
-    
-    final_title = title
-    if not t_cyr:
-        for name, func in [("groq", _translate_groq), ("deepl", _translate_deepl), ("googletrans", _translate_googletrans)]:
-            t = func(title)
-            if t: 
-                final_title = t
-                _STATS[f"{name}_ok"] += 1
-                break
-
-    final_summary = summary
-    if summary:
-        s_cyr = sum(1 for c in summary if 'а' <= c.lower() <= 'я' or c == 'ё') / max(len(summary), 1) > 0.3
-        if not s_cyr:
-            for name, func in [("groq", _translate_groq), ("deepl", _translate_deepl), ("googletrans", _translate_googletrans)]:
-                t = func(summary)
-                if t:
-                    final_summary = t
-                    _STATS[f"{name}_ok"] += 1
-                    break
-                    
-    return final_title, final_summary
+def make_russian_card(title: str, source_text: str = "") -> Dict[str, Any]:
+    if not source_text:
+        prompt = f"Заголовок: {title}\n\nНапиши краткое описание (1-2 предложения) на русском языке, раскрывающее суть этого заголовка. Не выдумывай конкретные цифры и имена. Также переведи заголовок на русский.\n\nОтвет строго в формате:\nЗАГОЛОВОК: <заголовок>\nОПИСАНИЕ: <текст>"
+    else:
+        prompt = f"Заголовок: {title}\n\nТекст: {source_text[:2000]}\n\n1) Переведи заголовок на русский.\n2) Напиши краткое описание (1-2 предложения) на русском языке, раскрывающее суть статьи.\n\nОтвет строго в формате:\nЗАГОЛОВОК: <заголовок>\nОПИСАНИЕ: <текст>"
+    raw = groq_chat(prompt) or gemini_generate(prompt)
+    if not raw: return {"title_ru": title, "description": "", "method": "raw"}
+    m = re.search(r"ЗАГОЛОВОК:\s*(.+?)\s*\n+\s*ОПИСАНИЕ:\s*(.+)", raw, re.S | re.I)
+    if m: return {"title_ru": m.group(1).strip(), "description": m.group(2).strip(), "method": "llm"}
+    m2 = re.search(r"ОПИСАНИЕ:\s*(.+)", raw, re.S | re.I)
+    if m2: return {"title_ru": title, "description": m2.group(1).strip(), "method": "llm"}
+    return {"title_ru": title, "description": raw, "method": "llm"}
