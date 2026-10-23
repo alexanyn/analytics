@@ -46,6 +46,40 @@ def _is_russian(text: str) -> bool:
     return _cyrillic_ratio(text) > 0.3
 
 
+
+def _translate_groq(text: str, is_summary: bool = False) -> str:
+    """Перевод через Groq API (Llama 3.3 70B). Очень быстрый и качественный."""
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        return ""
+        
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    prompt = "Переведи следующий текст на русский язык. Верни ТОЛЬКО перевод, без кавычек, пояснений и markdown:\n\n" + text[:2500]
+
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1
+    }
+    
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        if resp.status_code == 200:
+            data = resp.json()
+            return data["choices"][0]["message"]["content"].strip()
+        elif resp.status_code == 429:
+            logger.warning("Groq rate limit (429)")
+        else:
+            logger.warning(f"Groq HTTP {resp.status_code}: {resp.text[:100]}")
+    except Exception as e:
+        logger.debug(f"Groq failed: {e}")
+    return ""
+
 # =============== 1. GOOGLETRANS (основной) ===============
 
 def _translate_googletrans(text: str) -> str:
@@ -214,9 +248,9 @@ def _translate(text: str, is_summary: bool = False) -> str:
     else:
         order = [
             ("deepl",       lambda t: _translate_deepl(t)),
+            ("groq",        lambda t: _translate_groq(t, is_summary=is_summary)),
             ("googletrans", lambda t: _translate_googletrans(t)),
             ("mymemory",    lambda t: _translate_mymemory(t)),
-            ("gemini",      lambda t: _translate_gemini(t, is_summary=is_summary)),
         ]
 
     for name, func in order:
