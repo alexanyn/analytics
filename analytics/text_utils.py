@@ -75,3 +75,8 @@ def fetch_description_from_html(url: str) -> str:
     except Exception as e:
         logger.debug(f"Jina fetch failed: {e}")
     return ""
+
+def looks_translated(original: str, translated: str) -> bool:
+    """Проверяет, отличается ли перевод от оригинала."""
+    if not translated or not original: return False
+    return translated.strip() != original.strip()
