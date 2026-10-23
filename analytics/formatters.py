@@ -36,13 +36,9 @@ _EXTRA_TITLE_SUFFIXES = [
 def clean_html(text: str) -> str:
     if not text:
         return ""
-    # Заменяем литеральные \n и \r на пробелы
     text = text.replace("\\n", " ").replace("\\r", " ")
-    # Удаляем скрипты и стили
     text = re.sub(r"(?is)<(script|style).*?</\1>", " ", text)
-    # Удаляем все html-теги
     text = re.sub(r"<[^>]+>", " ", text)
-    # Раскодируем entities
     text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"').replace("&#39;", "'")
     return re.sub(r"\s+", " ", text).strip()
 
@@ -50,35 +46,33 @@ def post_process_text(text: str) -> str:
     if not text:
         return ""
     
-    # 1. Убираем мусор Chatham House
-    text = re.sub(r"Chatham House и онлайн Послушайте.*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"Аноним\s*\(не подтверждено\).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
+    # 1. Убираем мусор
+    text = re.sub(r"Ноябрь \d{4}.*?Chatham House и онлайн", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"Аноним\s*\(не подтвержден\).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"Комментарий\s+\w+\.\s*drupal.*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
-
-    # 2. Убираем имена авторов CEPR (если начинается с 2-3 слов и тире/двоеточие)
     text = re.sub(r"^[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+)?\s*—\s*(экономист|старший|вице|профессор|исследователь).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
 
-    # 3. Убираем обрезки "впервые появилась на", "Пост", "Статья"
+    # 2. Убираем обрезки
+    text = re.sub(r"Пост\s+«.*?»\s+появился\s+впервые\s+на\.?", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)\s*$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*[«\"].*?[»\"]\s*впервые\s+появил(ась|ся)\s+на.*$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*впервые\s+появил(ась|ся)\s+на.*$", "", text, flags=re.IGNORECASE)
 
-    # 4. Пробелы и знаки препинания
+    # 3. Пробелы и знаки препинания
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z0-9])", r"\1 ", text)
     text = re.sub(r"([а-яё])([А-ЯЁ])", r"\1 \2", text)
     text = re.sub(r"(\d)([А-ЯЁ])", r"\1 \2", text)
     text = re.sub(r"([а-яё])(\d)", r"\1 \2", text)
 
-    # 5. Markdown
+    # 4. Markdown и числа
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     text = re.sub(r"\s+\[(.+?)\]\(.+?\)", r"\1", text)
     text = re.sub(r"^#+\s*", "", text)
-
-    # 6. Числа (1, 5 -> 1.5)
     text = re.sub(r"(\d)\s*,\s*(\d)", r"\1.\2", text)
     text = re.sub(r"(\d)\.\s+(\d)", r"\1.\2", text)
 
-    # 7. Финальная зачистка
+    # 5. Финальная зачистка
+    text = re.sub(r"[\s—–-]+$", "", text) # убираем тире в конце
     text = re.sub(r"\s+", " ", text).strip()
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     if text and text[0].islower():
@@ -93,7 +87,6 @@ def strip_source_suffix_from_title(title: str, source_name: str = "") -> str:
         all_names.append(source_name)
     all_names.extend(set(CANONICAL_NAMES.values()))
 
-    # Убираем хвосты типа "– The", "- The"
     title = re.sub(r"[?!.,]?\s*[-–—|:]\s*The\s*$", "", title, flags=re.IGNORECASE).strip()
 
     for name in all_names:
@@ -179,11 +172,12 @@ def is_junk_article(article: Article) -> bool:
     # Отсекаем профили авторов и служебные страницы
     if "/author/" in article.link or "/people/" in article.link or "/profile/" in article.link:
         return True
+    if "search" in article.link.lower() or "solr" in t_lower or "поиск" in t_lower:
+        return True
 
     JUNK_WORDS = ["корзина", "bookstore", "книжный магазин", "база данных", "database",
                   "values.php", "armtrade", "login", "sign in", "sign up", "privacy policy",
-                  "search results", "страница поиска", "представлено", "presented by", 
-                  "поиск (solr)", "поиск ("]
+                  "страница поиска", "представлено", "presented by"]
     if any(w in t_lower for w in JUNK_WORDS): return True
     if re.search(r"\.(com|org|ru|net|info|io|php|gov|edu)\b", t_lower): return True
 

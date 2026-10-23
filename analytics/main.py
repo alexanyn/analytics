@@ -18,7 +18,8 @@ from .metrics import log_metrics, send_alert
 from .text_utils import normalize_for_dedup, fetch_description_from_html
 from .formatters import (
     is_junk_article, clean_html, remove_title_from_summary, 
-    strip_trailing_source, strip_source_suffix_from_title, get_source_name
+    strip_trailing_source, strip_source_suffix_from_title, get_source_name,
+    CANONICAL_NAMES
 )
 
 logger = logging.getLogger("analytics_digest")
@@ -40,22 +41,30 @@ def translate_one(article):
     # 1. Очищаем RSS-описание от HTML
     clean_summary = clean_html(article.summary or "")
     
-    # 2. Убираем дубли заголовка и названия источника
+    # 2. Если описание — это просто название источника, сбрасываем его
+    sources_lower = [s.lower() for s in CANONICAL_NAMES.values()]
+    if clean_summary.lower().strip() in sources_lower:
+        clean_summary = ""
+    if clean_summary and any(src in clean_summary for src in ["CSIS", "Chatham House", "IEA", "CEPR", "ECFR", "RAND", "Bruegel"]):
+        if len(clean_summary) < 60:
+            clean_summary = ""
+    
+    # 3. Убираем дубли заголовка и названия источника
     clean_summary = remove_title_from_summary(clean_title, clean_summary)
     clean_summary = strip_trailing_source(clean_summary, source)
     
-    # 3. Если после очистки остался огрызок (меньше 30 символов) — идем в Jina
+    # 4. Если после очистки остался огрызок — идем в Jina
     if not clean_summary or len(clean_summary.strip()) < 30:
         clean_summary = fetch_description_from_html(article.link)
 
-    # 4. Проверяем снова, если Jina вернула мусор
+    # 5. Проверяем снова
     if clean_summary and len(clean_summary.strip()) < 30:
         clean_summary = ""
 
-    # 5. Переводим
+    # 6. Переводим
     t_title, t_summary = translate_article(clean_title, clean_summary)
 
-    # 6. ЖЕСТКАЯ ГАРАНТИЯ: если пусто или дубль — генерируем через Groq
+    # 7. ЖЕСТКАЯ ГАРАНТИЯ: если пусто, дубль или просто название источника — генерируем!
     if not t_summary or len(t_summary.strip()) < 15 or t_summary.strip().lower() == t_title.strip().lower():
         t_summary = generate_description_groq(clean_title)
         if not t_summary:
@@ -145,7 +154,6 @@ def main():
         log_metrics("crashed")
         send_alert("crashed", [str(e)[:200]])
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
