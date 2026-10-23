@@ -562,28 +562,21 @@ def article_to_html(article: Article, cache: dict) -> str:
     source = get_source_name(article.feed_url)
 
     title = strip_source_suffix_from_title(title, source)
-    
-    # Убираем дубль заголовка в описании
     summary = remove_title_from_summary(title, summary)
     summary = strip_trailing_source(summary, source)
-    summary = truncate_at_sentence(summary, max_len=900)
-
-    # Никаких проверок на латиницу/кириллицу — если текст есть, мы его выводим!
-
-    # Если summary полностью совпадает с заголовком — убираем
-    if summary and title and summary.strip().lower() == title.strip().lower():
-        summary = ""
+    
+    # Если summary пустой после всех чисток, но в кэше был — берем из кэша напрямую
+    if not summary:
+        summary = cached.get("translated_summary", "")
 
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     summary = summary.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     source_html = source.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     link = article.link.strip()
-
     html = f"<b>{title}</b>"
     if summary:
-        html += f"\n\n{summary}"
-        html += "\n\n"
+        html += f"\n\n{summary}\n\n"
     else:
         html += "\n\n"
         
