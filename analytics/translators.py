@@ -1,311 +1,80 @@
 # analytics/translators.py
 import os
-import time
-import threading
 import logging
 import requests
 
 logger = logging.getLogger("analytics_digest")
+_STATS = {"groq_ok": 0, "deepl_ok": 0, "googletrans_ok": 0, "generated": 0, "fail": 0}
 
-# Автоопределение среды
-import os as _os
-IS_GITHUB_ACTIONS = _os.environ.get("GITHUB_ACTIONS") == "true"
-
-# Флаги: если сервис упал — не тратим время на повторные попытки
-_DEEPL_DEAD = [False]
-_GEMINI_DEAD = [False]
-
-_STATS = {"googletrans_ok": 0, "deepl_ok": 0, "gemini_ok": 0, "mymemory_ok": 0, "fail": 0}
-
-# Rate limiter для googletrans (Google Translate: 5 запросов/сек лимит)
-_LOCK = threading.Lock()
-_LAST_CALL = [0.0]
-_MIN_INTERVAL = 0.35  # ~2.85 запроса/сек
-
-# Флаги доступности внешних сервисов (если упали — не тратим время)
-_DEEPL_AVAILABLE = [True]
-_GEMINI_AVAILABLE = [True]
-
-
-def _rate_limit():
-    with _LOCK:
-        elapsed = time.time() - _LAST_CALL[0]
-        if elapsed < _MIN_INTERVAL:
-            time.sleep(_MIN_INTERVAL - elapsed)
-        _LAST_CALL[0] = time.time()
-
-
-def _cyrillic_ratio(text: str) -> float:
-    if not text:
-        return 0.0
-    cyr = sum(1 for c in text if "а" <= c.lower() <= "я" or c == "ё")
-    return cyr / len(text)
-
-
-def _is_russian(text: str) -> bool:
-    return _cyrillic_ratio(text) > 0.3
-
-
-
-def _translate_groq(text: str, is_summary: bool = False) -> str:
-    """Перевод через Groq API с использованием доступных моделей."""
+def _call_groq(prompt: str) -> str:
     api_key = os.environ.get("GROQ_API_KEY")
-    if not api_key:
-        return ""
-        
-    url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    if not api_key: return ""
     
-    prompt = "Переведи следующий текст на русский язык. Верни ТОЛЬКО перевод, без кавычек, пояснений и markdown:\n\n" + text[:2500]
-
-    # Список моделей, которые есть в вашем аккаунте Groq
-    models = [
-        "openai/gpt-oss-120b",
-        "qwen/qwen3.8-27b",
-        "openai/gpt-oss-20b",
-        "allam-2-7b"
-    ]
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    models = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
     
     for model in models:
-        payload = {
-            "model": model,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.1
-        }
         try:
+            payload = {"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.3}
             resp = requests.post(url, headers=headers, json=payload, timeout=15)
             if resp.status_code == 200:
-                data = resp.json()
-                return data["choices"][0]["message"]["content"].strip()
-            elif resp.status_code == 404:
-                # Модель не найдена — пробуем следующую
-                continue
-            elif resp.status_code == 429:
-                logger.warning(f"Groq rate limit (429) на модели {model}")
-                break
-            else:
-                logger.warning(f"Groq HTTP {resp.status_code} для {model}: {resp.text[:100]}")
-                break
-        except Exception as e:
-            logger.debug(f"Groq failed for {model}: {e}")
-            break
-            
+                return resp.json()["choices"][0]["message"]["content"].strip()
+        except Exception:
+            continue
     return ""
 
+def generate_description_groq(title: str) -> str:
+    """Если текста нет вообще — просим ИИ написать описание по заголовку."""
+    prompt = f"Напиши краткое описание (1-2 предложения) на русском языке, раскрывающее суть этого заголовка: {title}. Не выдумывай конкретные цифры и имена."
+    res = _call_groq(prompt)
+    if res: _STATS["generated"] += 1
+    return res
 
-def _translate_googletrans(text: str) -> str:
-    """Google Translate через googletrans — работает из GitHub Actions."""
-    if not text:
-        return ""
-    try:
-        from googletrans import Translator
-        for attempt in range(3):
-            _rate_limit()
-            try:
-                t = Translator().translate(text[:4500], dest="ru").text
-                if t and t.strip() and t.strip() != text.strip():
-                    return t.strip()
-                return ""
-            except Exception as e:
-                err = str(e).lower()
-                if "too many" in err or "429" in err:
-                    time.sleep(2 ** attempt)
-                    continue
-                logger.debug(f"googletrans inner: {e}")
-                return ""
-    except Exception as e:
-        logger.debug(f"googletrans import/fatal: {e}")
-    return ""
-
-
-# =============== 2. DEEPL (если работает) ===============
+def _translate_groq(text: str, is_summary: bool = False) -> str:
+    prompt = "Переведи этот текст на русский язык. Верни ТОЛЬКО перевод:\n\n" + text[:2500]
+    return _call_groq(prompt)
 
 def _translate_deepl(text: str) -> str:
-    """DeepL — может не работать из GitHub Actions (IP-блок)."""
-    if not _DEEPL_AVAILABLE[0]:
-        return ""
     api_key = os.environ.get("DEEPL_API_KEY")
-    if not api_key:
-        _DEEPL_AVAILABLE[0] = False
-        return ""
-
-    host = "api-free.deepl.com" if api_key.strip().endswith(":fx") else "api.deepl.com"
-    url = f"https://{host}/v2/translate"
-    chunk = text[:5000]
-
+    if not api_key: return ""
+    host = "api-free.deepl.com" if api_key.endswith(":fx") else "api.deepl.com"
     try:
-        resp = requests.post(
-            url,
-            headers={
-                "Authorization": f"DeepL-Auth-Key {api_key.strip()}",
-                "Content-Type": "application/json",
-            },
-            json={"text": [chunk], "target_lang": "RU", "preserve_formatting": False},
-            timeout=15,
-        )
+        resp = requests.post(f"https://{host}/v2/translate", 
+            headers={"Authorization": f"DeepL-Auth-Key {api_key}"},
+            json={"text": [text[:5000]], "target_lang": "RU"}, timeout=10)
         if resp.status_code == 200:
-            data = resp.json()
-            if data.get("translations"):
-                t = data["translations"][0].get("text", "").strip()
-                if t:
-                    return t
-            return ""
-        if resp.status_code == 403:
-            _DEEPL_DEAD[0] = True
-            logger.warning("DeepL: 403 (IP-блок или неверный ключ). Отключаю до конца прогона.")
-            return ""
-        if resp.status_code == 456:
-            _DEEPL_AVAILABLE[0] = False
-            logger.warning("DeepL: квота исчерпана. Отключаю DeepL.")
-            return ""
-        logger.debug(f"DeepL HTTP {resp.status_code}")
-    except Exception as e:
-        logger.debug(f"DeepL exception: {e}")
+            return resp.json()["translations"][0]["text"].strip()
+    except Exception: pass
     return ""
 
-
-
-
-def _translate_mymemory(text: str) -> str:
-    """MyMemory — публичный API без ключа, 5000 символов/день анонимно."""
-    if not text:
-        return ""
+def _translate_googletrans(text: str) -> str:
     try:
-        # Разбиваем длинные тексты (лимит MyMemory ~500 байт на запрос для анонимного)
-        chunks = []
-        current = ""
-        for sentence in text.replace("! ", ". ").replace("? ", ". ").split(". "):
-            if len(current) + len(sentence) < 450:
-                current += sentence + ". "
-            else:
-                if current:
-                    chunks.append(current.strip())
-                current = sentence + ". "
-        if current:
-            chunks.append(current.strip())
-
-        parts = []
-        for chunk in chunks[:5]:  # не больше 5 фрагментов
-            resp = requests.get(
-                "https://api.mymemory.translated.net/get",
-                params={"q": chunk[:490], "langpair": "en|ru"},
-                timeout=10,
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                t = data.get("responseData", {}).get("translatedText", "")
-                if t and "MYMEMORY WARNING" not in t:
-                    parts.append(t)
-        if parts:
-            return " ".join(parts)
-    except Exception as e:
-        logger.debug(f"MyMemory failed: {e}")
-    return ""
-
-
-# =============== 3. GEMINI (крайний fallback) ===============
-
-def _translate_gemini(text: str, is_summary: bool = False) -> str:
-    if not _GEMINI_AVAILABLE[0]:
-        return ""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        _GEMINI_AVAILABLE[0] = False
-        return ""
-
-    prompt = (
-        "Переведи на русский язык (кратко, 1-2 предложения). Без markdown. Только чистый текст.\n\n"
-        if is_summary
-        else "Переведи заголовок на русский язык. Без markdown, без транслитерации, без названия источника. Только чистый перевод.\n\n"
-    ) + f"Текст: {text[:500]}"
-
-    url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-3.8-flash:generateContent?key={api_key}"
-    )
-    try:
-        resp = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=20)
-        if resp.status_code == 200:
-            data = resp.json()
-            if data.get("candidates"):
-                parts = data["candidates"][0].get("content", {}).get("parts", [])
-                if parts:
-                    return parts[0].get("text", "").strip()
-        elif resp.status_code in (429, 503):
-            _GEMINI_AVAILABLE[0] = False
-            logger.warning(f"Gemini: {resp.status_code} — отключаю Gemini до конца прогона")
-    except Exception as e:
-        logger.debug(f"Gemini: {e}")
-    return ""
-
-
-# =============== Оркестратор ===============
-
-def _translate(text: str, is_summary: bool = False) -> str:
-    """Перевод с автоопределением среды:
-    - GitHub Actions: googletrans → DeepL → MyMemory → Gemini
-    - Локально:       DeepL → googletrans → MyMemory → Gemini
-    """
-    if not text or len(text.strip()) < 3:
-        return ""
-
-    if IS_GITHUB_ACTIONS:
-        order = [
-            ("googletrans", lambda t: _translate_googletrans(t)),
-            ("deepl",       lambda t: _translate_deepl(t)),
-            ("mymemory",    lambda t: _translate_mymemory(t)),
-            ("gemini",      lambda t: _translate_gemini(t, is_summary=is_summary)),
-        ]
-    else:
-        order = [
-            ("deepl",       lambda t: _translate_deepl(t)),
-            ("groq",        lambda t: _translate_groq(t, is_summary=is_summary)),
-            ("googletrans", lambda t: _translate_googletrans(t)),
-            ("mymemory",    lambda t: _translate_mymemory(t)),
-        ]
-
-    for name, func in order:
-        try:
-            t = func(text)
-        except Exception as e:
-            logger.debug(f"{name} raised: {e}")
-            t = ""
-        if t:
-            _STATS[f"{name}_ok"] = _STATS.get(f"{name}_ok", 0) + 1
-            return t
-
-    _STATS["fail"] = _STATS.get("fail", 0) + 1
-    return ""
-
+        from googletrans import Translator
+        return Translator().translate(text[:4500], dest="ru").text
+    except Exception: return ""
 
 def translate_article(title: str, summary: str) -> tuple[str, str]:
-    t_cyr = _is_russian(title)
-    s_cyr = _is_russian(summary) if summary else True
-    if t_cyr and s_cyr:
-        return title, summary
-
+    t_cyr = sum(1 for c in title if 'а' <= c.lower() <= 'я' or c == 'ё') / max(len(title), 1) > 0.3
+    
     final_title = title
-    final_summary = summary
-
     if not t_cyr:
-        translated = _translate(title, is_summary=False)
-        if translated:
-            final_title = translated
+        for name, func in [("groq", _translate_groq), ("deepl", _translate_deepl), ("googletrans", _translate_googletrans)]:
+            t = func(title)
+            if t: 
+                final_title = t
+                _STATS[f"{name}_ok"] += 1
+                break
 
-    if not s_cyr and summary:
-        translated = _translate(summary, is_summary=True)
-        if translated:
-            final_summary = translated
-
+    final_summary = summary
+    if summary:
+        s_cyr = sum(1 for c in summary if 'а' <= c.lower() <= 'я' or c == 'ё') / max(len(summary), 1) > 0.3
+        if not s_cyr:
+            for name, func in [("groq", _translate_groq), ("deepl", _translate_deepl), ("googletrans", _translate_googletrans)]:
+                t = func(summary)
+                if t:
+                    final_summary = t
+                    _STATS[f"{name}_ok"] += 1
+                    break
+                    
     return final_title, final_summary
-
-
-def translate_and_summarize(text: str, is_summary: bool = False) -> str:
-    if not text or len(text.strip()) < 3:
-        return text
-    if _is_russian(text):
-        return text
-    return _translate(text, is_summary=is_summary) or text

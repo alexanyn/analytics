@@ -552,13 +552,6 @@ def is_junk_article(article: Article) -> bool:
     return False
 
 def article_to_html(article: Article, cache: dict) -> str:
-    # Защита: если после очистки ничего не осталось — возвращаем пустоту
-    if not article.title or not re.search(r'[a-zA-Zа-яА-Я0-9]', article.title):
-        return ""
-    # Защита: если после очистки ничего не осталось — вернуть пустую строку
-    _sanity_title = (article.title or "").strip()
-    if not _sanity_title:
-        return ""
     cached = cache.get(normalize_for_dedup(article.title), {})
     title = cached.get("translated_title", article.title)
     summary = cached.get("translated_summary", article.summary)
@@ -569,11 +562,17 @@ def article_to_html(article: Article, cache: dict) -> str:
     source = get_source_name(article.feed_url)
 
     title = strip_source_suffix_from_title(title, source)
+    
+    # Убираем дубль заголовка в описании
     summary = remove_title_from_summary(title, summary)
     summary = strip_trailing_source(summary, source)
-    summary = truncate_at_sentence(summary, max_len=600)
+    summary = truncate_at_sentence(summary, max_len=900)
 
-    # (английский summary больше не удаляем — показываем с пометкой [EN])
+    # Никаких проверок на латиницу/кириллицу — если текст есть, мы его выводим!
+
+    # Если summary полностью совпадает с заголовком — убираем
+    if summary and title and summary.strip().lower() == title.strip().lower():
+        summary = ""
 
     title = title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     summary = summary.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -581,18 +580,13 @@ def article_to_html(article: Article, cache: dict) -> str:
 
     link = article.link.strip()
 
-    # Если summary == title (или это лишь «[EN] title») — не дублируем
-    title_clean = re.sub(r"^\[EN\]\s*", "", title, flags=re.IGNORECASE).strip().lower()
-    summary_clean = re.sub(r"^\[EN\]\s*", "", summary, flags=re.IGNORECASE).strip().lower() if summary else ""
-    if summary_clean and title_clean == summary_clean:
-        summary = ""
-
     html = f"<b>{title}</b>"
     if summary:
         html += f"\n\n{summary}"
         html += "\n\n"
     else:
         html += "\n\n"
+        
     if link and (link.startswith("http://") or link.startswith("https://")):
         safe_link = link.replace('"', "&quot;")
         html += f'<i><a href="{safe_link}">{source_html}</a></i>'

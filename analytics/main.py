@@ -30,26 +30,27 @@ MAX_TRANSLATE_WORKERS = 5
 
 
 def _clean_summary_before_translation(title: str, summary: str, source: str) -> str:
-    """Очищает summary от дубля заголовка и названия источника.
-    Возвращает только полезный текст для перевода, или "" если текста нет."""
+    """Очищает summary от дубля заголовка и названия источника."""
     if not summary:
         return ""
 
     s = summary.strip()
-
-    # 1. Если summary начинается с заголовка — отрезаем
+    
     def norm(x):
         return " ".join(x.lower().split())
 
     t_norm = norm(title)
     s_norm = norm(s)
-    if t_norm and s_norm.startswith(t_norm):
+    
+    # Если summary совпадает с заголовком или начинается с него — отрезаем
+    if t_norm and (s_norm == t_norm or s_norm.startswith(t_norm)):
         s = s[len(title):].strip(" .,:;-–—|")
         s_norm = norm(s)
+        if len(s) < 30:
+            return ""
 
-    # 2. Убираем название источника (в начале или конце)
+    # Убираем название источника (в начале или конце)
     if source:
-        # Убираем все вхождения «CSIS | Center...», «IEA - International...», «Edelman» и т.п.
         for pattern in [
             rf"\s*[-–—|:]\s*{re.escape(source)}.*$",
             rf"\s*{re.escape(source)}\s*[-–—|:].*$",
@@ -57,37 +58,15 @@ def _clean_summary_before_translation(title: str, summary: str, source: str) -> 
         ]:
             s = re.sub(pattern, "", s, flags=re.IGNORECASE).strip(" .,:;-–—|")
 
-    # 3. Убираем общие RSS-артефакты
-    s = re.sub(r"\s*[-–—|]\s*[A-Z][A-Za-z\s&]{3,60}\s*[-–—|]?\s*$", "", s)
-    s = s.strip(" .,:;-–—|")
-
-    # 4. Если остался только короткий огрызок (< 30 символов) — считаем пустым
-    # Если остаток короткий (меньше 40), но в нём есть знаки препинания — это может быть реальное описание
-    if len(s) < 40:
-        if any(c in s for c in ".,!?"):
-            return s
-        return ""
-
-    # 5. Если после чистки всё ещё начинается с заголовка — снова убираем
-    s_norm = norm(s)
-    if t_norm and t_norm in s_norm[:len(t_norm) + 10]:
-        s = re.sub(
-            r"^\s*" + re.escape(title[:50]) + r"[^\w]*",
-            "", s, flags=re.IGNORECASE,
-        ).strip(" .,:;-–—|")
-
-    if len(s) < 40 and not any(c in s for c in ".,!?"):
+    if len(s) < 20:
         return ""
 
     return s
 
 
 def translate_one(article):
-    """Переводит статью (title + summary)."""
+    """Переводит статью. Гарантирует сохранение перевода."""
     from .formatters import strip_source_suffix_from_title, get_source_name
-
-    import re as _re
-    # ВНИМАНИЕ: re нужен внутри функции для _clean_summary
     try:
         source = get_source_name(article.feed_url)
         clean_title = strip_source_suffix_from_title(article.title, source) or article.title
@@ -95,31 +74,22 @@ def translate_one(article):
         source = ""
         clean_title = article.title
 
-    # Чистим summary ПЕРЕД переводом
-    clean_summary = _clean_summary_before_translation(
-        clean_title, article.summary or "", source
-    )
+    # 1. Чистим summary из RSS
+    clean_summary = _clean_summary_before_translation(clean_title, article.summary or "", source)
 
-    # Если после чистки summary пустой — пробуем вытащить из HTML статьи
+    # 2. Если пусто — идем в Jina за HTML-описанием
     if not clean_summary:
-        logger.debug(f"No summary in RSS for: {clean_title[:50]}. Fetching HTML...")
         clean_summary = fetch_description_from_html(article.link)
-        if clean_summary:
-            logger.debug(f"Fetched from HTML: {clean_summary[:50]}...")
-            # Обрезаем до 900 символов, чтобы не перегружать переводчик
-            clean_summary = clean_summary[:900]
 
-    # Если всё равно пусто — переводим только заголовок
+    # 3. Если текста реально нигде нет — переводим только заголовок
     if not clean_summary:
         try:
             t_title = translate_article(clean_title, "")[0]
         except Exception:
             t_title = clean_title
-        t_summary = ""
+        return article, t_title, "", looks_translated(clean_title, t_title)
 
-        title_ok = looks_translated(clean_title, t_title)
-        return article, t_title, t_summary, title_ok
-
+    # 4. Переводим заголовок + описание
     try:
         t_title, t_summary = translate_article(clean_title, clean_summary)
     except Exception as e:
@@ -127,17 +97,12 @@ def translate_one(article):
         t_title, t_summary = clean_title, clean_summary
 
     title_ok = looks_translated(clean_title, t_title)
-    summary_ok = looks_translated(clean_summary, t_summary)
-    ok = title_ok
+    
+    # 5. Просто сохраняем перевод. Если DeepL вернул русский текст — отлично.
+    # Если он вернул оригинал, пусть будет оригинал (лучше, чем ничего).
+    pass
 
-    if not summary_ok:
-        # Не удалось перевести — оставляем оригинал с пометкой [EN]
-        t_summary = "[EN] " + clean_summary
-
-    if not title_ok:
-        logger.debug(f"Translation miss: '{clean_title[:50]}' (t={title_ok}, s={summary_ok})")
-
-    return article, t_title, t_summary, ok
+    return article, t_title, t_summary, title_ok
 
 
 async def main_async():
