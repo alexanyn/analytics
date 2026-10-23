@@ -48,7 +48,7 @@ def _is_russian(text: str) -> bool:
 
 
 def _translate_groq(text: str, is_summary: bool = False) -> str:
-    """Перевод через Groq API (Llama 3.3 70B). Очень быстрый и качественный."""
+    """Перевод через Groq API с использованием доступных моделей."""
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         return ""
@@ -61,26 +61,40 @@ def _translate_groq(text: str, is_summary: bool = False) -> str:
     
     prompt = "Переведи следующий текст на русский язык. Верни ТОЛЬКО перевод, без кавычек, пояснений и markdown:\n\n" + text[:2500]
 
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1
-    }
+    # Список моделей, которые есть в вашем аккаунте Groq
+    models = [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-20b",
+        "allam-2-7b"
+    ]
     
-    try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=15)
-        if resp.status_code == 200:
-            data = resp.json()
-            return data["choices"][0]["message"]["content"].strip()
-        elif resp.status_code == 429:
-            logger.warning("Groq rate limit (429)")
-        else:
-            logger.warning(f"Groq HTTP {resp.status_code}: {resp.text[:100]}")
-    except Exception as e:
-        logger.debug(f"Groq failed: {e}")
+    for model in models:
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.1
+        }
+        try:
+            resp = requests.post(url, headers=headers, json=payload, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                return data["choices"][0]["message"]["content"].strip()
+            elif resp.status_code == 404:
+                # Модель не найдена — пробуем следующую
+                continue
+            elif resp.status_code == 429:
+                logger.warning(f"Groq rate limit (429) на модели {model}")
+                break
+            else:
+                logger.warning(f"Groq HTTP {resp.status_code} для {model}: {resp.text[:100]}")
+                break
+        except Exception as e:
+            logger.debug(f"Groq failed for {model}: {e}")
+            break
+            
     return ""
 
-# =============== 1. GOOGLETRANS (основной) ===============
 
 def _translate_googletrans(text: str) -> str:
     """Google Translate через googletrans — работает из GitHub Actions."""
