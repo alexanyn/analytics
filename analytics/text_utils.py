@@ -25,15 +25,32 @@ def _cyrillic_ratio(text: str) -> float:
 def looks_translated(original: str, translated: str) -> bool:
     if not translated or not original: return False
     if translated.strip() == original.strip(): return False
-    return True  # Если текст изменился — перевод был!
+    return True
+
+def is_generic_description(text: str) -> bool:
+    """Проверяет, является ли текст мусором (куки, Cloudflare, общие фразы)."""
+    if not text: return True
+    t = text.lower().strip()
+    
+    # Куки-баннеры и Cloudflare
+    junk_markers = [
+        "некоторые из сервисов", "используют сервисы google", "google fonts, analytics",
+        "этот веб-сайт использует", "защиты от вредоносных ботов", "проверяет, что вы не бот",
+        "just a moment", "enable javascript", "verify you are human", "captcha",
+        "we can't find the page", "page not found", "©", "copyright", "все права защищены",
+        "используя сайт", "политике обработки", "согласие", "cookie", "cookie policy"
+    ]
+    if any(m in t for m in junk_markers): return True
+    
+    # Футеры и юридическая информация
+    if t.startswith(("фонд", "развития и поддержки", "сетевое издание", "зарегистрировано")):
+        return True
+    return False
 
 def fetch_description_from_html(url: str) -> str:
-    """Достаем описание. Для Google News сначала расшифровываем ссылку."""
     jina_key = os.environ.get("JINA_API_KEY")
-    if not jina_key:
-        return ""
+    if not jina_key: return ""
 
-    # Расшифровка Google News
     real_url = url
     if "news.google.com" in url:
         try:
@@ -43,11 +60,7 @@ def fetch_description_from_html(url: str) -> str:
         except Exception as e:
             logger.debug(f"Google News decode failed: {e}")
 
-    headers = {
-        "Authorization": f"Bearer {jina_key}",
-        "Accept": "text/plain",
-        "X-With-Generated-Alt": "true"
-    }
+    headers = {"Authorization": f"Bearer {jina_key}", "Accept": "text/plain", "X-With-Generated-Alt": "true"}
     
     try:
         jina_url = f"https://r.jina.ai/{real_url}"
@@ -67,7 +80,7 @@ def fetch_description_from_html(url: str) -> str:
             if (len(p) > 80 
                 and not p.startswith(("!", "[", "##", "**", "|", "*", "http", "-"))
                 and "](" not in p
-                and "cookie" not in p.lower()):
+                and not is_generic_description(p)):
                 return p[:1000]
     except Exception as e:
         logger.debug(f"Jina fetch failed: {e}")
