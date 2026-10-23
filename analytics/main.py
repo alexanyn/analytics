@@ -15,7 +15,7 @@ from .translators import translate_article, generate_description_groq, _STATS
 from .senders import send_to_telegram
 from .scheduling import wait_until_publish_time
 from .metrics import log_metrics, send_alert
-from .text_utils import normalize_for_dedup, fetch_description_from_html
+from .text_utils import normalize_for_dedup, fetch_description_from_html, looks_translated
 from .formatters import (
     is_junk_article, clean_html, remove_title_from_summary, 
     strip_trailing_source, strip_source_suffix_from_title, get_source_name,
@@ -45,9 +45,9 @@ def translate_one(article):
     sources_lower = [s.lower() for s in CANONICAL_NAMES.values()]
     if clean_summary.lower().strip() in sources_lower:
         clean_summary = ""
-    if len(clean_summary) < 100 and any(src in clean_summary for src in ["CSIS", "Chatham", "CEPR", "ECFR", "IEA", "RAND", "Bruegel"]):
+    if len(clean_summary) < 100 and any(src in clean_summary for src in ["CSIS", "Chatham", "CEPR", "ECFR", "IEA", "RAND", "Bruegel", "Центр стратегических"]):
         clean_summary = ""
-    if "GMT" in clean_summary or "Аноним" in clean_summary or "онлайн" in clean_summary.lower():
+    if "GMT" in clean_summary or "Аноним" in clean_summary or "онлайн" in clean_summary.lower() or "выберите" in clean_summary.lower():
         clean_summary = ""
     
     # 3. Убираем дубли заголовка и названия источника

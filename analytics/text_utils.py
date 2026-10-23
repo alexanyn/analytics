@@ -16,8 +16,12 @@ def normalize_for_dedup(title: str) -> str:
     s = re.sub(r"[^\w\s]", " ", s, flags=re.UNICODE)
     return re.sub(r"\s+", " ", s).strip()
 
+def looks_translated(original: str, translated: str) -> bool:
+    if not translated or not original: return False
+    return translated.strip() != original.strip()
+
 def is_generic_description(text: str) -> bool:
-    """Проверяет, является ли текст мусором (куки, Cloudflare, общие фразы, анонсы)."""
+    """Проверяет, является ли текст мусором."""
     if not text: return True
     t = text.lower().strip()
     
@@ -25,15 +29,16 @@ def is_generic_description(text: str) -> bool:
         "изменить настройки", "встроенных визуализаций", "маркетинговых целей",
         "некоторые из сервисов", "используют сервисы google", "google fonts", 
         "этот веб-сайт использует", "защиты от вредоносных ботов", "проверяет, что вы не бот",
+        "выберите дополнительные параметры", "g.co/privacytools", "управление настройками конфиденциальности",
         "just a moment", "enable javascript", "verify you are human", "captcha",
         "we can't find the page", "page not found", "©", "copyright", "все права защищены",
         "используя сайт", "политике обработки", "согласие", "cookie",
         "комментарий thilton", "drupal", "аноним", "не подтвержден", "gmt", "ноябрь 2026",
-        "послушайте выступления", "вебинар", "онлайн"
+        "послушайте выступление", "вебинар", "онлайн", "чатем-хаус и онлайн", "chatham house и онлайн"
     ]
     if any(m in t for m in junk_markers): return True
     
-    if t.startswith(("фонд", "развития и поддержки", "сетевое издание", "зарегистрировано", "чтобы изменить")):
+    if t.startswith(("фонд", "развития и поддержки", "сетевое издание", "зарегистрировано", "чтобы изменить", "выберите")):
         return True
     return False
 
@@ -75,8 +80,3 @@ def fetch_description_from_html(url: str) -> str:
     except Exception as e:
         logger.debug(f"Jina fetch failed: {e}")
     return ""
-
-def looks_translated(original: str, translated: str) -> bool:
-    """Проверяет, отличается ли перевод от оригинала."""
-    if not translated or not original: return False
-    return translated.strip() != original.strip()

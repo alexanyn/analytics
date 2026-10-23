@@ -44,7 +44,7 @@ def clean_html(text: str) -> str:
     text = re.sub(r"(?is)<(script|style).*?</\1>", " ", text)
     text = re.sub(r"<[^>]+>", " ", text)
     text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"').replace("&#39;", "'")
-    text = text.replace("[&#8230;]", "").replace("&#8230;", "")
+    text = text.replace("[&#8230;]", "").replace("&#8230;", "").replace("&#160;", " ")
     return re.sub(r"\s+", " ", text).strip()
 
 def post_process_text(text: str) -> str:
@@ -55,11 +55,12 @@ def post_process_text(text: str) -> str:
     text = re.sub(r"Комментарий\s+\w+\.\s*drupal.*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+)?\s*—\s*(экономист|старший|вице|профессор|исследователь).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
 
-    # 2. ЖЁСТКАЯ очистка хвостов
-    text = re.sub(r"\s*Пост\s*«.*?»\s*появился\s*впервые\s*на.*$", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*Пост\s*«.*?»\s*впервые.*$", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)\s*$", "", text, flags=re.IGNORECASE)
+    # 2. ЖЁСТКАЯ очистка хвостов (любые вариации)
+    text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)?\s*«.*?»\s*впервые\s+.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*Пост\s*«.*?»\s*появился\s*впервые.*$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*впервые\s+опубликован.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*впервые\s+появил.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)\s*$", "", text, flags=re.IGNORECASE)
 
     # 3. Пробелы и знаки препинания
     text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z0-9])", r"\1 ", text)
@@ -156,7 +157,6 @@ def is_junk_article(article: Article) -> bool:
     text = (title + " " + (article.summary or "")).lower()
     t_lower = title.strip().lower()
     
-    # Отсекаем профили авторов и страницы поиска
     if "cepr.org" in article.link and ("/people/" in article.link or "/columns/" in article.link or "/profile/" in article.link): return True
     if "/author/" in article.link or "/profile/" in article.link: return True
     if "search" in article.link.lower() or "solr" in t_lower or "поиск" in t_lower: return True
