@@ -47,16 +47,16 @@ def clean_html(text: str) -> str:
 def post_process_text(text: str) -> str:
     if not text: return ""
     
-    # 1. Убираем мусор Chatham House
-    text = re.sub(r"Ноябрь \d{4}.*?Chatham House и онлайн", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"Октября \d{4}.*?военными", "Неожиданное объявление президента...", text, flags=re.IGNORECASE)
+    # 1. Убираем мусор
+    text = re.sub(r"Ноябрь \d{4}.*?Чатем[- ]Хаус и онлайн", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"Ноябрь \d{4}.*?GMT.*?Чатем[- ]Хаус и онлайн", "", text, flags=re.IGNORECASE)
     text = re.sub(r"Аноним\s*\(не подтвержден\).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"Комментарий\s+\w+\.\s*drupal.*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
     text = re.sub(r"^[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+(\s+[А-ЯЁ][а-яё]+)?\s*—\s*(экономист|старший|вице|профессор|исследователь).*?(?=\s[A-ZА-ЯЁ]|$)", "", text, flags=re.IGNORECASE)
 
-    # 2. Убираем хвосты
-    text = re.sub(r"Пост\s+«.*?»\s+появился\s+впервые\s+на\.?", "", text, flags=re.IGNORECASE)
-    text = re.sub(r"\[?&#8230;\]?\s*(Статья|Пост|Публикация|Сообщение)?", "", text, flags=re.IGNORECASE)
+    # 2. ЖЁСТКАЯ очистка хвостов WordPress (убираем всё после "впервые")
+    text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)?\s*«.*?»\s*впервые\s+.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*впервые\s+опубликован.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*впервые\s+появил.*$", "", text, flags=re.IGNORECASE)
     text = re.sub(r"\s*(Статья|Пост|Публикация|Сообщение)\s*$", "", text, flags=re.IGNORECASE)
 
     # 3. Пробелы и знаки препинания
@@ -154,6 +154,15 @@ def is_junk_article(article: Article) -> bool:
     text = (title + " " + (article.summary or "")).lower()
     t_lower = title.strip().lower()
     
+    # Отсекаем профили авторов CEPR
+    if "cepr.org" in article.link:
+        if "/people/" in article.link or "/columns/" in article.link or "/profile/" in article.link or "/voxeu/columns/" in article.link:
+            return True
+        # Если заголовок — это просто имя (2-3 слова) и нет описания
+        words = title.strip().split()
+        if len(words) <= 3 and not article.summary:
+            return True
+
     if "/author/" in article.link or "/people/" in article.link or "/profile/" in article.link: return True
     if "search" in article.link.lower() or "solr" in t_lower or "поиск" in t_lower: return True
 
@@ -184,7 +193,6 @@ def article_to_html(article: Article, cache: dict) -> str:
     title = post_process_text(clean_html(title))
     summary = post_process_text(clean_html(summary))
 
-    # Если после перевода все еще мусор — стираем
     if is_generic_description(summary): summary = ""
 
     source = get_source_name(article.feed_url)

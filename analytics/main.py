@@ -41,13 +41,14 @@ def translate_one(article):
     # 1. Очищаем RSS-описание от HTML
     clean_summary = clean_html(article.summary or "")
     
-    # 2. Если описание — это просто название источника, сбрасываем его
+    # 2. Если описание — это просто название источника или мероприятие — сбрасываем
     sources_lower = [s.lower() for s in CANONICAL_NAMES.values()]
     if clean_summary.lower().strip() in sources_lower:
         clean_summary = ""
-    if clean_summary and any(src in clean_summary for src in ["CSIS", "Chatham House", "IEA", "CEPR", "ECFR", "RAND", "Bruegel"]):
-        if len(clean_summary) < 60:
-            clean_summary = ""
+    if len(clean_summary) < 100 and any(src in clean_summary for src in ["CSIS", "Chatham", "CEPR", "ECFR", "IEA", "RAND", "Bruegel"]):
+        clean_summary = ""
+    if "GMT" in clean_summary or "Аноним" in clean_summary or "онлайн" in clean_summary.lower():
+        clean_summary = ""
     
     # 3. Убираем дубли заголовка и названия источника
     clean_summary = remove_title_from_summary(clean_title, clean_summary)
