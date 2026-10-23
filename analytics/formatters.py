@@ -35,65 +35,63 @@ _EXTRA_TITLE_SUFFIXES = [
     "Stockholm International Peace Research Institute", "The Diplomat", "Foreign Affairs"
 ]
 
-
 def clean_html(text: str) -> str:
     if not text:
         return ""
-    # Удаляем скрипты и стили
     text = re.sub(r"(?is)<(script|style).*?</\1>", " ", text)
-    # Удаляем ВСЕ html-теги
     text = re.sub(r"<[^>]+>", " ", text)
-    # Раскодируем entities
     text = text.replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", '"').replace("&#39;", "'")
-    text = re.sub(r"\s+", " ", text)
-    return text.strip()
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def post_process_text(text: str) -> str:
     if not text:
         return ""
 
-    # 1. Пробел после знаков препинания
-    text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z0-9])", r"\1 ", text)
+    # 1. Убираем мусор Chatham House
+    text = re.sub(r"Аноним\s*\(не подтверждено\).*?Chatham House и онлайн", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"Комментарий\s+\w+\.\s*drupal.*?(?=\s[A-ZА-ЯЁ]|$)", "", text)
+    text = re.sub(r"\b\w+\.\s*drupal@?\w*", "", text)
 
-    # Склейки строчная+Заглавная в кириллице
+    # 2. Убираем имена авторов CEPR
+    text = re.sub(r"^[А-ЯЁ][а-яё]+\s+[А-ЯЁ][а-яё]+\s*—\s*(экономист|старший|вице|профессор|исследователь).*?$", "", text)
+
+    # 3. Обрезки "впервые появилась на"
+    text = re.sub(r"\s*[«\"].*?[»\"]\s*впервые\s+появил(ась|ся)\s+на\s*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*впервые\s+появил(ась|ся)\s+на\s*$", "", text, flags=re.IGNORECASE)
+
+    # 4. Пробелы в знаках препинания
+    text = re.sub(r"([.,!?;:])(?=[А-Яа-яЁёA-Za-z0-9])", r"\1 ", text)
     text = re.sub(r"([а-яё])([А-ЯЁ])", r"\1 \2", text)
     text = re.sub(r"(\d)([А-ЯЁ])", r"\1 \2", text)
     text = re.sub(r"([а-яё])(\d)", r"\1 \2", text)
-
-    # Убираем markdown-звездочки и решетки в начале
     text = re.sub(r"\*(?=\S)", " ", text)
     text = re.sub(r"^#+\s*", "", text)
     text = re.sub(r"\s+#+\s+", " ", text)
 
-    # WordPress-хвосты
-    text = re.sub(r"\s*[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
+    # 5. Markdown и ссылки
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"\s+\[(.+?)\]\(.+?\)", r"\1", text)
+
+    # 6. Исправление точек и запятых в числах
+    text = re.sub(r"(\d)\s*,\s*(\d)", r"\1.\2", text) # 1, 5 -> 1.5
+    text = re.sub(r"(\d)\.\s+(\d)", r"\1.\2", text)     # 2. 0 -> 2.0
+
+    # 7. Хвосты
+    text = re.sub(r"\s+[Пп]ост\s+[^:]{1,200}:\s*", " ", text)
     text = re.sub(r"\s+[Пп]ост\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
-    text = re.sub(r"\s+[Пп]оявился\s+[Пп]ост\s+[^.!?]{5,250}\s*$", " ", text)
     text = re.sub(r"\s+[Пп]убликация\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
     text = re.sub(r"\s+[Сс]ообщение\s+[А-ЯЁA-Z][^.!?]{5,250}\s*$", " ", text)
+    text = re.sub(r"\s+Присоединяйтесь к War on the Rocks.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+Получайте доступ к контенту.*$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s+«?_CSIS Charts_?» создаётся.*$", "", text, flags=re.IGNORECASE)
 
-    # Убираем рекламу
-    text = re.sub(r"Присоединяйтесь к War on the Rocks.*?(\.|$)", "", text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r"«?_CSIS Charts_?» создаётся.*?(\.|$)", "", text, flags=re.IGNORECASE|re.DOTALL)
-    text = re.sub(r"Получайте доступ к контенту.*?(\.|$)", "", text, flags=re.IGNORECASE|re.DOTALL)
-
-    # Jamestown
-    text = re.sub(r"\s+The\s+(?:Jamestown\s+Foundation)?\s*$", "", text)
-
-    # U.S. -> US
+    # 8. Спец. замены
+    text = text.replace("Чик-фил-А", "Chick-fil-A")
     text = re.sub(r"\bU\.\s*S\.", "US", text)
     text = re.sub(r"\bU\.\s*K\.", "UK", text)
 
-    # Точечные правки
-    text = text.replace("Чик-фил-А", "Chick-fil-A")
-    text = text.replace("пожарной безопасности", "огневой поддержки")
-
-    # Пробел между латиницей и кириллицей
-    text = re.sub(r"([a-zA-Z])([А-Яа-яЁё])", r"\1 \2", text)
-    text = re.sub(r"([А-Яа-яЁё])([a-zA-Z])", r"\1 \2", text)
-
-    # Схлопываем пробелы
+    # 9. Финальная очистка
     text = re.sub(r"\s+", " ", text).strip()
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
 
@@ -122,6 +120,12 @@ def strip_source_suffix_from_title(title: str, source_name: str = "") -> str:
 def remove_title_from_summary(title: str, summary: str) -> str:
     if not title or not summary:
         return summary
+    
+    # Если они совпадают на 80% — убираем описание
+    from difflib import SequenceMatcher
+    if SequenceMatcher(None, title.lower(), summary.lower()).ratio() > 0.8:
+        return ""
+
     t_norm = " ".join(re.sub(r"[^\w\s]", " ", title.lower()).split())
     s_norm = " ".join(re.sub(r"[^\w\s]", " ", summary.lower()).split())
     t_words = t_norm.split()
@@ -144,6 +148,8 @@ def remove_title_from_summary(title: str, summary: str) -> str:
             remainder = summary[pos:].lstrip(' .,:;-–—?!«»"\'')
             if len(remainder) > 40:
                 summary = remainder
+            else:
+                summary = ""
     return summary
 
 
@@ -191,20 +197,15 @@ def is_junk_article(article: Article) -> bool:
     text = (title + " " + (article.summary or "")).lower()
     t_lower = title.strip().lower()
 
-    # Мусорные страницы
     JUNK_WORDS = ["корзина", "bookstore", "книжный магазин", "база данных", "database",
                   "values.php", "armtrade", "login", "sign in", "sign up", "privacy policy",
-                  "search results", "страница поиска", "представлено", "presented by"]
+                  "search results", "страница поиска", "представлено", "presented by", "поиск (solr)"]
     if any(w in t_lower for w in JUNK_WORDS): return True
     if re.search(r"\.(com|org|ru|net|info|io|php|gov|edu)\b", t_lower): return True
 
-    # Подкасты
     if re.search(r"\b(podcast|подкаст|audio|аудио|episode|эпизод|webinar|вебинар)\b", text): return True
-
-    # Выпуски
     if re.match(r"^(volume|vol\.|том|issue|выпуск)\s+\d+", t_lower): return True
 
-    # Имена
     words = title.strip().split()
     if 2 <= len(words) <= 3 and len(title.strip()) < 45:
         clean_words = ["X" if re.match(r"^[А-ЯЁA-Z]\.$", w) else w for w in words]
@@ -215,7 +216,6 @@ def is_junk_article(article: Article) -> bool:
 
 
 def article_to_html(article: Article, cache: dict) -> str:
-    # Защита от пустых карточек
     if not article.title or len(article.title.strip()) < 3:
         return ""
 
