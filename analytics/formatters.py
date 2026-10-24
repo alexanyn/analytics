@@ -25,7 +25,7 @@ def format_card(a: dict) -> str:
 
 def build_messages(by_cat: dict) -> list:
     now = datetime.now(ZoneInfo("Europe/Moscow"))
-    header = f"📊 <b>АНАЛИТИЧЕСКИЙ ДАЙДЖЕСТ</b> — {now:%d.%m.%Y}"
+    header = "📊 <b>АНАЛИТИЧЕСКИЙ ДАЙДЖЕСТ</b>"
     messages = []
     current = header
     def flush():
