@@ -43,14 +43,14 @@
 <body>
 <header>
   <h1>Analytics · Мониторинг</h1>
-  <div class="meta">Обновлено 23.10.2026 07:01 МСК</div>
+  <div class="meta">Обновлено 24.10.2026 07:01 МСК</div>
 </header>
 
 <div class="strip">
-  <div class="cell"><span class="big mono">8</span><span class="label">Прогонов за 7 дней</span></div>
+  <div class="cell"><span class="big mono">10</span><span class="label">Прогонов за 7 дней</span></div>
   <div class="cell"><span class="big mono">100%</span><span class="label">Успешных</span></div>
-  <div class="cell"><span class="big mono">21.0</span><span class="label">Ср. статей / дайджест</span></div>
-  <div class="cell"><span class="big mono">168</span><span class="label">Всего статей</span></div>
+  <div class="cell"><span class="big mono">18.7</span><span class="label">Ср. статей / дайджест</span></div>
+  <div class="cell"><span class="big mono">187</span><span class="label">Всего статей</span></div>
 </div>
 
 <main>
@@ -63,7 +63,11 @@
     <h2><span class="eyebrow">02</span> Последние прогоны</h2>
     <table>
       <thead><tr><th>Время</th><th>Статус</th><th class="num">Статей</th><th class="num">Длит.</th><th>Ошибки</th></tr></thead>
-      <tbody><tr><td class='mono'>23.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>29</td><td class='mono num'>31с</td><td class='dim'>—</td></tr>
+      <tbody><tr><td class='mono'>23.10 13:10</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>29</td><td class='mono num'>28с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>23.10 13:08</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>8</td><td class='mono num'>9с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>23.10 13:07</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>12</td><td class='mono num'>23с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>23.10 13:04</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>18</td><td class='mono num'>25с</td><td class='dim'>—</td></tr>
+<tr><td class='mono'>23.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>29</td><td class='mono num'>31с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>22.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>26</td><td class='mono num'>27с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>21.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>24</td><td class='mono num'>24с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>20.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>29с</td><td class='dim'>—</td></tr>
@@ -73,11 +77,7 @@
 <tr><td class='mono'>16.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>25</td><td class='mono num'>42с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>15.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>23</td><td class='mono num'>43с</td><td class='dim'>—</td></tr>
 <tr><td class='mono'>14.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>21</td><td class='mono num'>39с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>13.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>22</td><td class='mono num'>42с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>12.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>9</td><td class='mono num'>24с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>11.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>9</td><td class='mono num'>28с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>10.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>21</td><td class='mono num'>33с</td><td class='dim'>—</td></tr>
-<tr><td class='mono'>09.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>22</td><td class='mono num'>35с</td><td class='dim'>—</td></tr></tbody>
+<tr><td class='mono'>13.10 07:01</td><td><span class="tag tag-ok">Отправлен</span></td><td class='mono num'>22</td><td class='mono num'>42с</td><td class='dim'>—</td></tr></tbody>
     </table>
   </section>
   
@@ -106,10 +106,10 @@
 new Chart(document.getElementById('itemsChart'), {
   type: 'line',
   data: {
-    labels: ["16.10", "17.10", "18.10", "19.10", "20.10", "21.10", "22.10", "23.10"],
+    labels: ["18.10", "19.10", "20.10", "21.10", "22.10", "23.10"],
     datasets: [{
       label: 'Статей в дайджесте',
-      data: [25, 23, 7, 9, 25, 24, 26, 29],
+      data: [7, 9, 25, 24, 26, 96],
       borderColor: '#F0A83C',
       backgroundColor: 'rgba(240,168,60,0.08)',
       borderWidth: 2, pointRadius: 3, fill: true, tension: 0.25,
