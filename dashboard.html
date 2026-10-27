@@ -43,14 +43,14 @@
 <body>
 <header>
   <h1>Analytics · Мониторинг</h1>
-  <div class="meta">Обновлено 26.10.2026 07:01 МСК</div>
+  <div class="meta">Обновлено 27.10.2026 07:01 МСК</div>
 </header>
 
 <div class="strip">
-  <div class="cell"><span class="big mono">8</span><span class="label">Прогонов за 7 дней</span></div>
+  <div class="cell"><span class="big mono">7</span><span class="label">Прогонов за 7 дней</span></div>
   <div class="cell"><span class="big mono">100%</span><span class="label">Успешных</span></div>
-  <div class="cell"><span class="big mono">21.4</span><span class="label">Ср. статей / дайджест</span></div>
-  <div class="cell"><span class="big mono">171</span><span class="label">Всего статей</span></div>
+  <div class="cell"><span class="big mono">20.9</span><span class="label">Ср. статей / дайджест</span></div>
+  <div class="cell"><span class="big mono">146</span><span class="label">Всего статей</span></div>
 </div>
 
 <main>
@@ -86,13 +86,13 @@
     <div class="health-grid">
       <div class="health-col">
         <div class="health-stat">
-          <span class="mono big">39/53</span>
+          <span class="mono big">41/53</span>
           <span class="dim">источников в норме</span>
         </div>
-        <h3>Мертвы (0)</h3>
-        <div class="src-row"><span class="mono">ben-evans.com</span><span class="dim"> — HTTP 404</span></div><div class="src-row"><span class="mono">brookings.edu</span><span class="dim"> — No entries (<unknown>:131:2: mismatched tag)</span></div><div class="src-row"><span class="mono">carnegieendowment.org</span><span class="dim"> — No entries (silent)</span></div><div class="src-row"><span class="mono">economist.com</span><span class="dim"> — HTTP 403</span></div><div class="src-row"><span class="mono">ft.com</span><span class="dim"> — Connection: 0, message='', url='https://www.ft.com/rss'</span></div><div class="src-row"><span class="mono">theinformation.com</span><span class="dim"> — HTTP 403</span></div>
-        <h3>Протухли (8)</h3>
-        <div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 27.2</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 7.1</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 48.2</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 7.0</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 13.6</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 621.2</span></div><div class="src-row"><span class="mono">page.org</span><span class="dim"> — 24.9</span></div><div class="src-row"><span class="mono">ponarseurasia.org</span><span class="dim"> — 53.9</span></div>
+        <h3>Мертвы (1)</h3>
+        <div class="src-row"><span class="mono">ben-evans.com</span><span class="dim"> — HTTP 404</span></div><div class="src-row"><span class="mono">brookings.edu</span><span class="dim"> — No entries (<unknown>:131:2: mismatched tag)</span></div><div class="src-row"><span class="mono">carnegieendowment.org</span><span class="dim"> — No entries (silent)</span></div><div class="src-row"><span class="mono">economist.com</span><span class="dim"> — HTTP 403</span></div><div class="src-row"><span class="mono">econs.online</span><span class="dim"> — HTTP 400</span></div><div class="src-row"><span class="mono">ft.com</span><span class="dim"> — Connection: 0, message='', url='https://www.ft.com/rss'</span></div><div class="src-row"><span class="mono">theinformation.com</span><span class="dim"> — HTTP 403</span></div>
+        <h3>Протухли (5)</h3>
+        <div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 25.2</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 7.4</span></div><div class="src-row"><span class="mono">news.google.com</span><span class="dim"> — 18.2</span></div><div class="src-row"><span class="mono">ponarseurasia.org</span><span class="dim"> — 60.9</span></div><div class="src-row"><span class="mono">swp-berlin.org</span><span class="dim"> — 10.5</span></div>
         <h3>Заблокированы ботозащитой (6)</h3>
         <div class="dim small">Эти источники защищены Cloudflare/пейволлом — блокировка ожидаема, не считается проблемой.</div>
       </div>
@@ -106,10 +106,10 @@
 new Chart(document.getElementById('itemsChart'), {
   type: 'line',
   data: {
-    labels: ["20.10", "21.10", "22.10", "23.10"],
+    labels: ["21.10", "22.10", "23.10"],
     datasets: [{
       label: 'Статей в дайджесте',
-      data: [25, 24, 26, 96],
+      data: [24, 26, 96],
       borderColor: '#F0A83C',
       backgroundColor: 'rgba(240,168,60,0.08)',
       borderWidth: 2, pointRadius: 3, fill: true, tension: 0.25,
