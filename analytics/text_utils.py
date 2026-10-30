@@ -298,8 +298,21 @@ def classify(title: str, summary: str = "", hint: Optional[str] = None, extra: O
     for name, words in (extra or {}).items():
         c = normalize_category(name)
         if c and isinstance(words, list): kw[c] += [str(w).lower() for w in words if isinstance(w, str)]
+    
     best, best_score = None, 0
     for c, words in kw.items():
-        score = sum(1 for w in words if w in text)
-        if score > best_score: best, best_score = c, score
+        score = 0
+        for w in words:
+            w = w.strip()
+            if not w:
+                continue
+            # Если слово короткое (например, "ai", "ии", "it"), ищем его только целиком
+            if len(w) <= 3:
+                if re.search(rf"\b{re.escape(w)}\b", text):
+                    score += 1
+            else:
+                if w in text:
+                    score += 1
+        if score > best_score: 
+            best, best_score = c, score
     return best or "Геополитика"
