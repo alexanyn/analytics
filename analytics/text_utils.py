@@ -270,7 +270,7 @@ _ALIASES = [
 _EXACT = {"pr": "Бизнес", "коммуникации": "Бизнес", "communications": "Бизнес"}
 
 KEYWORDS = {
-    "Геополитика": ["санкц", "sanction", "nato", "нато", "переговор", "дипломат", "выбор", "election", "война", "war", "ukraine", "украин", "china", "китай", "russia", "россия", "евросоюз", "summit", "саммит", "treaty", "договор"],
+    "Геополитика": ["санкц", "sanction", "nato", "нато", "переговор", "дипломат", "выбор", "election", "война", "war", "ukraine", "украин", "china", "китай", "russia", "россия", "евросоюз", "summit", "саммит", "treaty", "договор", "визит", "министр"],
     "Экономика": ["inflation", "инфляц", "gdp", "ввп", "central bank", "центробанк", "ключевая ставка", "interest rate", "recession", "рецесс", "tariff", "пошлин", "бюджет", "budget", "trade", "торгов", "currency", "валют", "рубл", "доллар", "dollar"],
     "Бизнес": ["merger", "слияни", "acquisition", "поглощен", "ipo", "earnings", "прибыл", "выручк", "revenue", "startup", "стартап", "ceo", "инвест", "invest", "company", "компани", "shares", "акци"],
     "Технологии": ["ai ", " ии", "искусственн", "openai", "nvidia", "chip", "чип", "semiconductor", "полупроводник", "software", "cloud", "облак", "robot", "робот", "quantum", "квант", "llm"],
