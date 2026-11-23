@@ -1,11 +1,11 @@
 {
-  "checked_at": "2026-11-16T15:29:42.953369",
+  "checked_at": "2026-11-23T17:54:45.131503",
   "stale_threshold_days": 7,
   "summary": {
     "total": 53,
-    "ok": 36,
-    "stale": 10,
-    "dead": 1,
+    "ok": 35,
+    "stale": 8,
+    "dead": 4,
     "blocked": 6
   },
   "details": [
@@ -60,6 +60,16 @@
       "known_blocked": false
     },
     {
+      "url": "https://eng.globalaffairs.ru/feed/",
+      "source_name": "eng.globalaffairs.ru",
+      "status": "dead",
+      "entries_count": 0,
+      "latest_entry_age_days": null,
+      "http_status": null,
+      "error": "Timeout",
+      "known_blocked": false
+    },
+    {
       "url": "https://www.ft.com/rss",
       "source_name": "ft.com",
       "status": "dead",
@@ -68,6 +78,26 @@
       "http_status": null,
       "error": "Connection: 0, message='', url='https://www.ft.com/rss'",
       "known_blocked": true
+    },
+    {
+      "url": "https://www.monde-diplomatique.fr/recents.xml",
+      "source_name": "monde-diplomatique.fr",
+      "status": "dead",
+      "entries_count": 0,
+      "latest_entry_age_days": null,
+      "http_status": 404,
+      "error": "HTTP 404",
+      "known_blocked": false
+    },
+    {
+      "url": "https://www.technologyreview.com/feed/",
+      "source_name": "technologyreview.com",
+      "status": "dead",
+      "entries_count": 0,
+      "latest_entry_age_days": null,
+      "http_status": 403,
+      "error": "HTTP 403",
+      "known_blocked": false
     },
     {
       "url": "https://www.theinformation.com/rss",
@@ -80,41 +110,11 @@
       "known_blocked": true
     },
     {
-      "url": "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "stale",
-      "entries_count": 60,
-      "latest_entry_age_days": 28.4,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:energyland.info&hl=ru&gl=RU&ceid=RU:ru",
-      "source_name": "news.google.com",
-      "status": "stale",
-      "entries_count": 80,
-      "latest_entry_age_days": 18.4,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:oxfordenergy.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "stale",
-      "entries_count": 62,
-      "latest_entry_age_days": 84.2,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
       "url": "https://news.google.com/rss/search?q=site:valdaiclub.com&hl=ru&gl=RU&ceid=RU:ru",
       "source_name": "news.google.com",
       "status": "stale",
-      "entries_count": 60,
-      "latest_entry_age_days": 86.7,
+      "entries_count": 61,
+      "latest_entry_age_days": 93.7,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -123,38 +123,48 @@
       "url": "https://news.google.com/rss/search?q=site:instituteforpr.org&hl=en-US&gl=US&ceid=US:en",
       "source_name": "news.google.com",
       "status": "stale",
-      "entries_count": 58,
-      "latest_entry_age_days": 1013.3,
+      "entries_count": 57,
+      "latest_entry_age_days": 1020.4,
       "http_status": 200,
       "error": null,
       "known_blocked": false
     },
     {
-      "url": "https://news.google.com/rss/search?q=site:osw.waw.pl&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:energyland.info&hl=ru&gl=RU&ceid=RU:ru",
       "source_name": "news.google.com",
       "status": "stale",
-      "entries_count": 51,
-      "latest_entry_age_days": 26.4,
+      "entries_count": 50,
+      "latest_entry_age_days": 143.5,
       "http_status": 200,
       "error": null,
       "known_blocked": false
     },
     {
-      "url": "https://news.google.com/rss/search?q=site:merics.org&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:ainowinstitute.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "stale",
+      "entries_count": 59,
+      "latest_entry_age_days": 201.1,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:woodmac.com&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "stale",
+      "entries_count": 79,
+      "latest_entry_age_days": 13.4,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:oxfordenergy.org&hl=en-US&gl=US&ceid=US:en",
       "source_name": "news.google.com",
       "status": "stale",
       "entries_count": 60,
-      "latest_entry_age_days": 25.0,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://www.page.org/feed/",
-      "source_name": "page.org",
-      "status": "stale",
-      "entries_count": 10,
-      "latest_entry_age_days": 27.0,
+      "latest_entry_age_days": 244.3,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -164,7 +174,7 @@
       "source_name": "ponarseurasia.org",
       "status": "stale",
       "entries_count": 10,
-      "latest_entry_age_days": 82.1,
+      "latest_entry_age_days": 89.2,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -174,7 +184,7 @@
       "source_name": "swp-berlin.org",
       "status": "stale",
       "entries_count": 100,
-      "latest_entry_age_days": 11.0,
+      "latest_entry_age_days": 18.1,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -184,7 +194,7 @@
       "source_name": "about.bnef.com",
       "status": "ok",
       "entries_count": 10,
-      "latest_entry_age_days": 3.6,
+      "latest_entry_age_days": 3.2,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -194,7 +204,7 @@
       "source_name": "carbonbrief.org",
       "status": "ok",
       "entries_count": 12,
-      "latest_entry_age_days": 3.9,
+      "latest_entry_age_days": 0.1,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -204,17 +214,7 @@
       "source_name": "chathamhouse.org",
       "status": "ok",
       "entries_count": 50,
-      "latest_entry_age_days": 0.1,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://eng.globalaffairs.ru/feed/",
-      "source_name": "eng.globalaffairs.ru",
-      "status": "ok",
-      "entries_count": 50,
-      "latest_entry_age_days": 0.5,
+      "latest_entry_age_days": 0.2,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -224,57 +224,7 @@
       "source_name": "foreignaffairs.com",
       "status": "ok",
       "entries_count": 20,
-      "latest_entry_age_days": 0.3,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://www.monde-diplomatique.fr/recents.xml",
-      "source_name": "monde-diplomatique.fr",
-      "status": "ok",
-      "entries_count": 20,
-      "latest_entry_age_days": 0.1,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 60,
-      "latest_entry_age_days": 0.9,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:woodmac.com&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 67,
-      "latest_entry_age_days": 6.2,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:iea.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 83,
-      "latest_entry_age_days": 3.3,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:iiss.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 70,
-      "latest_entry_age_days": 0.1,
+      "latest_entry_age_days": 0.4,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -284,127 +234,7 @@
       "source_name": "news.google.com",
       "status": "ok",
       "entries_count": 12,
-      "latest_entry_age_days": 0.6,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 71,
-      "latest_entry_age_days": 0.6,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:ecfr.eu&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 84,
-      "latest_entry_age_days": 0.1,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:piie.com&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 72,
-      "latest_entry_age_days": 2.9,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:csis.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 100,
-      "latest_entry_age_days": 2.8,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:bruegel.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 64,
-      "latest_entry_age_days": 6.2,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:lawfaremedia.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 86,
-      "latest_entry_age_days": 1.1,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:cepr.org+OR+site:voxeu.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 70,
-      "latest_entry_age_days": 0.6,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:eastasiaforum.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 76,
-      "latest_entry_age_days": 2.7,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:thedrum.com&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 99,
-      "latest_entry_age_days": 5.1,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:jamestown.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 72,
-      "latest_entry_age_days": 3.7,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:edelman.com&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 92,
-      "latest_entry_age_days": 6.2,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://news.google.com/rss/search?q=site:rand.org&hl=en-US&gl=US&ceid=US:en",
-      "source_name": "news.google.com",
-      "status": "ok",
-      "entries_count": 76,
-      "latest_entry_age_days": 0.0,
+      "latest_entry_age_days": 3.4,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -413,27 +243,77 @@
       "url": "https://news.google.com/rss/search?q=site:sipri.org&hl=en-US&gl=US&ceid=US:en",
       "source_name": "news.google.com",
       "status": "ok",
-      "entries_count": 60,
-      "latest_entry_age_days": 5.5,
+      "entries_count": 62,
+      "latest_entry_age_days": 0.3,
       "http_status": 200,
       "error": null,
       "known_blocked": false
     },
     {
-      "url": "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:bruegel.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 61,
+      "latest_entry_age_days": 4.3,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:merics.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 63,
+      "latest_entry_age_days": 0.3,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:eastasiaforum.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 80,
+      "latest_entry_age_days": 2.3,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:edelman.com&hl=en-US&gl=US&ceid=US:en",
       "source_name": "news.google.com",
       "status": "ok",
       "entries_count": 100,
-      "latest_entry_age_days": 0.6,
+      "latest_entry_age_days": 4.3,
       "http_status": 200,
       "error": null,
       "known_blocked": false
     },
     {
-      "url": "https://news.google.com/rss/search?q=site:dgap.org&hl=en-US&gl=US&ceid=US:en",
+      "url": "https://news.google.com/rss/search?q=site:iiss.org&hl=en-US&gl=US&ceid=US:en",
       "source_name": "news.google.com",
       "status": "ok",
-      "entries_count": 97,
+      "entries_count": 94,
+      "latest_entry_age_days": 4.2,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:thedrum.com&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.3,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:osw.waw.pl&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 54,
       "latest_entry_age_days": 3.2,
       "http_status": 200,
       "error": null,
@@ -444,7 +324,137 @@
       "source_name": "news.google.com",
       "status": "ok",
       "entries_count": 100,
+      "latest_entry_age_days": 3.2,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:iea.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 88,
+      "latest_entry_age_days": 0.0,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:piie.com&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 71,
+      "latest_entry_age_days": 0.2,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:dgap.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 96,
+      "latest_entry_age_days": 4.0,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:lawfaremedia.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 91,
+      "latest_entry_age_days": 1.2,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:cepr.org+OR+site:voxeu.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 72,
+      "latest_entry_age_days": 0.7,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:hai.stanford.edu&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.5,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:csis.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 2.9,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:jamestown.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 67,
+      "latest_entry_age_days": 3.6,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:ecfr.eu&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 83,
+      "latest_entry_age_days": 0.1,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:cfr.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 2.8,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:lowyinstitute.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 90,
       "latest_entry_age_days": 1.1,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://news.google.com/rss/search?q=site:rand.org&hl=en-US&gl=US&ceid=US:en",
+      "source_name": "news.google.com",
+      "status": "ok",
+      "entries_count": 100,
+      "latest_entry_age_days": 0.1,
+      "http_status": 200,
+      "error": null,
+      "known_blocked": false
+    },
+    {
+      "url": "https://www.page.org/feed/",
+      "source_name": "page.org",
+      "status": "ok",
+      "entries_count": 10,
+      "latest_entry_age_days": 4.8,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -464,7 +474,7 @@
       "source_name": "project-syndicate.org",
       "status": "ok",
       "entries_count": 20,
-      "latest_entry_age_days": 0.1,
+      "latest_entry_age_days": 0.0,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -474,7 +484,7 @@
       "source_name": "ragan.com",
       "status": "ok",
       "entries_count": 25,
-      "latest_entry_age_days": 0.1,
+      "latest_entry_age_days": 0.3,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -484,7 +494,7 @@
       "source_name": "spinsucks.com",
       "status": "ok",
       "entries_count": 150,
-      "latest_entry_age_days": 0.0,
+      "latest_entry_age_days": 4.2,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -494,17 +504,7 @@
       "source_name": "stratechery.com",
       "status": "ok",
       "entries_count": 10,
-      "latest_entry_age_days": 0.2,
-      "http_status": 200,
-      "error": null,
-      "known_blocked": false
-    },
-    {
-      "url": "https://www.technologyreview.com/feed/",
-      "source_name": "technologyreview.com",
-      "status": "ok",
-      "entries_count": 10,
-      "latest_entry_age_days": 0.1,
+      "latest_entry_age_days": 0.3,
       "http_status": 200,
       "error": null,
       "known_blocked": false
@@ -524,7 +524,7 @@
       "source_name": "warontherocks.com",
       "status": "ok",
       "entries_count": 100,
-      "latest_entry_age_days": 0.3,
+      "latest_entry_age_days": 0.4,
       "http_status": 200,
       "error": null,
       "known_blocked": false
