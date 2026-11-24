@@ -48,6 +48,14 @@ def _send_one_chunk(chat_id, chunk, token: str) -> bool:
                 time.sleep(wait_time)
                 continue
             if response.status_code == 200 and data.get("ok"):
+                result = data.get("result") if isinstance(data.get("result"), dict) else {}
+                message_id = result.get("message_id", "?")
+                returned_chat = result.get("chat") if isinstance(result.get("chat"), dict) else {}
+                chat_type = returned_chat.get("type", "?")
+                logger.info(
+                    "Telegram API подтвердил отправку: message_id=%s, chat_type=%s, chars=%d",
+                    message_id, chat_type, len(chunk),
+                )
                 return True
             if response.status_code == 429:
                 retry_after = data.get("parameters", {}).get("retry_after", 5)
@@ -73,6 +81,7 @@ def _send_one_chunk(chat_id, chunk, token: str) -> bool:
             if attempt < max_retries - 1:
                 time.sleep(wait_time)
             continue
+    logger.error("Telegram API не подтвердил отправку чанка после %d попыток", max_retries)
     return False
 
 
